@@ -1,0 +1,3 @@
+---- combine.interval Matches (2 in 1 files) ----
+Key_board.c (key_board):        combine.interval = KEY_TIME_CHECK(KEY_DEFAULT_COMBINE_INTERVAL_TIME);
+Key_board.c (key_board):                combine.timecnt = combine.interval + key_tick_ms;

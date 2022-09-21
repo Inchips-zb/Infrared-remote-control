@@ -1,2 +1,3 @@
-# Infrared-remote-control
- Using the ingchips-9186 make a infrared remote control
+# ir_test
+
+Add a description of your project here.

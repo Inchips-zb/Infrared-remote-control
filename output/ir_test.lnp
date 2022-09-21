@@ -1,0 +1,21 @@
+--cpu=Cortex-M4.fp.sp
+".\output\main.o"
+".\output\profile.o"
+".\output\user_ir_remote.o"
+".\output\startup_ing91600.o"
+"../../../Users/zb/AppData/Roaming/Local/Program/ING_SDK/sdk\bundles\typical\ING9168xx\symdefs.m"
+".\output\peripheral_uart.o"
+".\output\peripheral_pinctrl.o"
+".\output\peripheral_sysctrl.o"
+".\output\peripheral_timer.o"
+".\output\peripheral_ir.o"
+".\output\peripheral_gpio.o"
+".\output\peripheral_adc.o"
+".\output\peripheral_dma.o"
+".\output\trace.o"
+".\output\key_board.o"
+".\output\key_board_sample.o"
+--library_type=microlib --strict --scatter ".\output\ir_test.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\listing\ir_test.map" -o .\output\ir_test.axf
