@@ -14,7 +14,7 @@ typedef enum
   GPIO_PIN_RESET = 0u,
   GPIO_PIN_SET = 1u,    
 } GPIO_PinState;
-
+#define KB_NULL         0
 #define KB_POWER        0x66
 #define KB_PAGE_UP      0x4B
 #define KB_PAGE_DOWN    0x4E

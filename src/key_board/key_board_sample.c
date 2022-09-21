@@ -6,7 +6,6 @@
 typedef uint8_t keyFunc_t;
 typedef struct
 {
-
     keyFunc_t ketHardId;
     enum key_state_t state;
      keyFunc_t keyId;
@@ -14,24 +13,29 @@ typedef struct
     uint8_t count;
     void (*cbFun)(void);
 } keyFuncMap_t;
+static void test16(void)
+{
+    platform_printf("k16 press_long\n");
+}
 static keyFuncMap_t keyFuncMap[] = {
-   //hard id     triger state  key_event id   key describe         
-    {KB_HARD_K1,    KEY_PRESS, KB_LEFT        , "KB_LEFT"        ,0,NULL     }, // J1
-    {KB_HARD_K2,    KEY_PRESS, KB_RIGHT       , "KB_RIGHT"       ,0,NULL     }, // J2
-    {KB_HARD_K3,    KEY_PRESS, KB_UP          , "KB_UP"          ,0,NULL     }, // J3
-    {KB_HARD_K4,    KEY_PRESS, KB_DOWN        , "KB_DOWN"        ,0,NULL     }, // J4
-    {KB_HARD_K5,    KEY_PRESS, KB_ENTER       , "KB_ENTER"       ,0,NULL     }, // J5
-    {KB_HARD_K6,    KEY_PRESS, KB_EXIT        , "KB_EXIT"        ,0,NULL     }, // J6
-    {KB_HARD_K7,    KEY_PRESS, KB_POWER       , "KB_POWER"       ,0,NULL     }, // J7
-    {KB_HARD_K8,    KEY_PRESS, KB_MENU        , "KB_MENU"        ,0,NULL     }, // J8
-    {KB_HARD_K9,    KEY_PRESS, KB_HOME        , "KB_HOME"        ,0,NULL     }, // J9
-    {KB_HARD_K10,   KEY_PRESS, KB_VOICE       , "KB_VOICE"       ,0,NULL     }, // J10
-    {KB_HARD_K11,   KEY_PRESS, KB_VOLUME_MUTE , "KB_VOLUME_MUTE" ,0,NULL     }, // J11
-    {KB_HARD_K12,   KEY_PRESS, KB_VOLUME_UP   , "KB_VOLUME_UP"   ,0,NULL     }, // J12
-    {KB_HARD_K13,   KEY_PRESS, KB_VOLUME_DOWN , "KB_VOLUME_DOWN" ,0,NULL     }, // J13
-    {KB_HARD_K14,   KEY_PRESS, KB_VOICE_STOP  , "KB_VOICE_STOP"  ,0,NULL     }, // J14
-    {KB_HARD_K15,   KEY_PRESS, KB_PAGE_UP     , "KB_PAGE_UP"     ,0,NULL     }, // J15
-    {KB_HARD_K16,   KEY_PRESS, KB_PAGE_DOWN   , "KB_PAGE_DOWN"   ,0,NULL     }  // J16
+   //hard id       triger state   key_event id          key describe         
+    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,    "KB_LEFT"        ,  0,  NULL     }, // J1
+    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,    "KB_RIGHT"       ,  0,  NULL     }, // J2
+    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,    "KB_UP"          ,  0,  NULL     }, // J3
+    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,    "KB_DOWN"        ,  0,  NULL     }, // J4
+    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,    "KB_ENTER"       ,  0,  NULL     }, // J5
+    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,    "KB_EXIT"        ,  0,  NULL     }, // J6
+    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,    "KB_POWER"       ,  0,  NULL     }, // J7
+    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,    "KB_MENU"        ,  0,  NULL     }, // J8
+    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,    "KB_HOME"        ,  0,  NULL     }, // J9
+    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,    "KB_VOICE"       ,  0,  NULL     }, // J10
+    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,    "KB_VOLUME_MUTE" ,  0,  NULL     }, // J11
+    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,    "KB_VOLUME_UP"   ,  0,  NULL     }, // J12
+    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,    "KB_VOLUME_DOWN" ,  0,  NULL     }, // J13
+    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,    "KB_VOICE_STOP"  ,  0,  NULL     }, // J14
+    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,    "KB_PAGE_UP"     ,  0,  NULL     }, // J15
+    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,    "KB_PAGE_DOWN"   ,  0,  NULL     },  // J16
+    {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,    "KB_PAGE_DOWN"   ,  0,  test16     }  // J16
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -155,7 +159,8 @@ static void kb_check_event_callback(void)
        {
             if(keyFuncMap[i].cbFun)
                 keyFuncMap[i].cbFun();
-            btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
+            if(keyFuncMap[i].keyId)
+                btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
             bFlag = false;
        }
     
