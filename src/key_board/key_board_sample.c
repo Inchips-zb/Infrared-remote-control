@@ -4,6 +4,7 @@
 #include "../profile.h"
 
 typedef uint8_t keyFunc_t;
+
 typedef struct
 {
     keyFunc_t ketHardId;
@@ -13,11 +14,73 @@ typedef struct
     uint8_t count;
     void (*cbFun)(void);
 } keyFuncMap_t;
+
+typedef struct
+{
+    int combineKeyId;
+    const struct key_combine_t *pCombineTab;
+    uint8_t size;
+    keyFunc_t keyId;
+    const char *intro;
+    void (*cbFun)(void);
+} keyCombineMap_t;
+
+static const struct key_combine_t key_ir_learn[] = {
+    { .id = KB_HARD_K4,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
+};
+static const struct key_combine_t key_adv_start[] = {
+    { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K6,   .state = KEY_PRESS_LONG },
+};
+static const struct key_combine_t key_adv_stop[] = {
+    { .id = KB_HARD_K8,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K9,   .state = KEY_PRESS_LONG },
+};
+static const struct key_combine_t key_power_on[] = {
+    { .id = KB_HARD_K11,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K12,  .state = KEY_PRESS_LONG },
+};
+static const struct key_combine_t key_power_off[] = {
+    { .id = KB_HARD_K14,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K15,  .state = KEY_PRESS_LONG },
+};
+
+static void cmbinetest1(void)
+{
+    platform_printf("key_ir_learn\n");
+}
+static void cmbinetest2(void)
+{
+    platform_printf("key_adv_start\n");
+}
+static void cmbinetest3(void)
+{
+    platform_printf("key_adv_stop\n");
+}
+static void cmbinetest4(void)
+{
+    platform_printf("key_power_on\n");
+}
+static void cmbinetest5(void)
+{
+    platform_printf("key_power_off\n");
+}
+static keyCombineMap_t keyCombineMap[] = 
+{
+    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_NULL,    "IR_LEARN"  ,  cmbinetest1}, // combine1
+    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_NULL,    "ADV_START" ,  cmbinetest2}, // combine1
+    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_NULL,    "ADV_STOP"  ,  cmbinetest3}, // combine1
+    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_NULL,    "POWER_ON"  ,  cmbinetest4}, // combine1
+    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,    "POWER_OFF" ,  cmbinetest5}, // combine1
+};
+
 static void test16(void)
 {
     platform_printf("k16 press_long\n");
 }
-static keyFuncMap_t keyFuncMap[] = {
+
+static const keyFuncMap_t keyFuncMap[] = {
    //hard id       triger state   key_event id          key describe         
     {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,    "KB_LEFT"        ,  0,  NULL     }, // J1
     {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,    "KB_RIGHT"       ,  0,  NULL     }, // J2
@@ -157,17 +220,36 @@ static void kb_check_event_callback(void)
         }
        if(bFlag)
        {
-            if(keyFuncMap[i].cbFun)
+            if(NULL != keyFuncMap[i].cbFun)
                 keyFuncMap[i].cbFun();
-            if(keyFuncMap[i].keyId)
+            if(KB_NULL != keyFuncMap[i].keyId)
                 btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
             bFlag = false;
        }
     
     }
-
+    for(int i = 0;i < GET_ARRAY_SIZE(keyCombineMap);i++)
+    {
+        if(keyCombineMap[i].combineKeyId && key_check_combine_state(keyCombineMap[i].combineKeyId))
+        {
+            if(NULL != keyCombineMap[i].cbFun)keyCombineMap[i].cbFun();
+            if(KB_NULL != keyCombineMap[i].keyId) 
+                btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyCombineMap[i].keyId,sizeof(keyCombineMap[i].keyId));
+        }
+    
+    }
 }
-TimerHandle_t complexKeyTimer = 0;
+static void combine_register(void)
+{
+    for(int i = 0;i < GET_ARRAY_SIZE(keyCombineMap);i++)
+    {
+        if(NULL != keyCombineMap[i].pCombineTab)
+        {
+             keyCombineMap[i].combineKeyId = key_combine_register(keyCombineMap[i].pCombineTab, keyCombineMap[i].size);
+        }
+    }
+}
+static TimerHandle_t complexKeyTimer = 0;
 
 static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
@@ -196,13 +278,13 @@ void GPIO_Key_Board_Init(void)
         GIO_WriteValue(key_pin_ctrl[i].pin, 1);
     }
 #endif
-
     key_board_init();
 #if (USER_KEY_BOARD_MATRIX)
     key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl));
 #else
     key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0);
 #endif
+    combine_register();
     complexKeyTimer = xTimerCreate("Complex Key",
                         pdMS_TO_TICKS(COMPLEX_TIMER_INTERVAL),
                         pdTRUE,

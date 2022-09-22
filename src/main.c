@@ -69,30 +69,6 @@ void config_uart(uint32_t freq, uint32_t baud)
     apUART_Initialize(PRINT_PORT, &config, 0);
 }
 
-/* USER CODE BEGIN 0 */
-static int test_id1,test_id2,test_id3,test_id14,test_id4;
-
-const struct key_combine_t test_combine1[] = {
-    { .id = KB_HARD_K1,   .state = KEY_RELEASE },
-    { .id = KB_HARD_K2,   .state = KEY_RELEASE },
-};
-const struct key_combine_t test_combine2[] = {
-    { .id = KB_HARD_K8,   .state = KEY_PRESS },
-    { .id = KB_HARD_K9,   .state = KEY_PRESS },
-};
-const struct key_combine_t test_combine3[] = {
-    { .id = KB_HARD_K11,   .state = KEY_PRESS },
-    { .id = KB_HARD_K12,   .state = KEY_PRESS },
-};
-const struct key_combine_t test_combine4[] = {
-    { .id = KB_HARD_K4,   .state = KEY_PRESS_LONG },
-    { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
-};
-const struct key_combine_t test_combine14[] = {
-    { .id = KB_HARD_K14,   .state = KEY_PRESS },
-    { .id = KB_HARD_K15,   .state = KEY_PRESS },
-};
-/* USER CODE END 0 */
 
 void key_print_debug_callback(const char *str)
 {
