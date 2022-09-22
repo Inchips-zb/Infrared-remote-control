@@ -120,7 +120,7 @@ struct match_list_t {
     const struct key_combine_t *match;     //Combination status to be matched
     unsigned int n;                        //Record the number of digits of combined status
     unsigned int match_count;              //Matched Success Count
-
+    unsigned char flag;
     struct match_list_t *next;             //Combination status for linking the next registration
 
     struct event_cnt_t combine_event;      //Combined Event Count
@@ -129,7 +129,6 @@ struct match_list_t {
 struct {
     unsigned int timecnt;                      //Record the time since the last trigger
     unsigned int interval;                     //Maximum allowable interval between two consecutive triggering
-    unsigned char flag;
     struct match_list_t head;
 }static combine;
 #endif
@@ -417,6 +416,7 @@ int key_combine_register(const struct key_combine_t c[], unsigned int n)
         return -1;
     combin_item[item_count].match = c;
     combin_item[item_count].n = n;
+    combin_item[item_count].flag &= 0;
     combin_item[item_count].match_count = 0;
     combin_item[item_count].next = combine.head.next;
     combin_item[item_count].combine_event.rd_cnt = 0;
@@ -468,16 +468,14 @@ unsigned int key_check_combine_state(int id)
 static inline void key_check_combine_pre(void)
 {
     struct match_list_t *item;
-    static int ai = 0;
     if(combine.timecnt && (key_tick_ms - combine.timecnt < KEY_MAX_TIME))
     {
        combine.timecnt = 0;
-       combine.flag = 0;
        item = combine.head.next;
        while(item)
         {
             item->match_count = 0;
-
+            item->flag &= 0;
             item = item->next;
         }
     }
@@ -498,12 +496,13 @@ static inline void key_check_combine(struct key_private_t *sig)
                //Retime
                 combine.timecnt = combine.interval + key_tick_ms;               
                 //Matching succeeded
-                if(!(combine.flag & (1<<i)))
-                {
-                    combine.flag |= 1<<i;
+                if(!(item->flag & (1<<i)))
+                {                 
+                    item->flag |= 1<<i;
+//                  platform_printf("0x%02x,%d,%d\n",item->flag,item->match_count,item->n);
                     if(++item->match_count == item->n)
                     {
-                        combine.flag = 0;
+                        item->flag &= 0;
                         item->match_count = 0;
                         ++item->combine_event.wr_cnt;
                     }              
@@ -622,7 +621,6 @@ void key_check(void)
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
     key_check_combine_pre();
 #endif
-
     for(i = 0;i < GET_ARRAY_SIZE(key_board) && key_board[i];i++)
     {
         obj = key_board[i];
@@ -641,7 +639,6 @@ void key_check(void)
                 //Pull the control line to be scanned to the active level
                 obj->ctrl[next].set(obj->ctrl[next].pin_desc, true);
             }
-
             obj->sig[j].this_level = obj->sig[j].property->get(obj->sig[j].property->pin_desc);
             switch((obj->sig[j].this_level << 4) | (obj->sig[j].last_level))
             {

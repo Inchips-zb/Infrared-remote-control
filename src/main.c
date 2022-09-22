@@ -69,76 +69,65 @@ void config_uart(uint32_t freq, uint32_t baud)
     apUART_Initialize(PRINT_PORT, &config, 0);
 }
 
-
-void key_print_debug_callback(const char *str)
-{
-    platform_printf("%s\n", str);
-}
-static uint32_t timer2_isr(void *user_data);
-static void init_timer2(void)
+static uint32_t timer1_isr(void *user_data);
+static void init_timer1(void)
 {
     SYSCTRL_ClearClkGateMulti(0
                                 | (1 << SYSCTRL_ClkGate_APB_TMR2));
 #if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
     // setup timer 1: 40us (25kHz)
-    TMR_SetCMP(APB_TMR2, TMR_CLK_FREQ / 25000);
-    TMR_SetOpMode(APB_TMR2, TMR_CTL_OP_MODE_WRAPPING);
-    TMR_IntEnable(APB_TMR2);
-    TMR_Reload(APB_TMR2);
-    TMR_Enable(APB_TMR2);
+    TMR_SetCMP(APB_TMR1, TMR_CLK_FREQ / 25000);
+    TMR_SetOpMode(APB_TMR1, TMR_CTL_OP_MODE_WRAPPING);
+    TMR_IntEnable(APB_TMR1);
+    TMR_Reload(APB_TMR1);
+    TMR_Enable(APB_TMR1);
 #elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
     // setup channel 0 timer 1: 0.5s (2Hz)
-    SYSCTRL_SelectTimerClk(TMR_PORT_2, SYSCTRL_TMR_CLK_32k); 
-    TMR_SetOpMode(APB_TMR2, 0, TMR_CTL_OP_MODE_32BIT_TIMER_x1, TMR_CLK_MODE_EXTERNAL, 0);
-    TMR_SetReload(APB_TMR2, 0, TMR_GetClk(APB_TMR2, 0) / 2);
-    TMR_Enable(APB_TMR2, 0, 0xf);
+//    SYSCTRL_SelectTimerClk(TMR_PORT_1, SYSCTRL_TMR_CLK_32k); 
+//    TMR_SetOpMode(APB_TMR1, 0, TMR_CTL_OP_MODE_32BIT_TIMER_x1, TMR_CLK_MODE_EXTERNAL, 0);
+//    TMR_SetReload(APB_TMR1, 0, TMR_GetClk(APB_TMR2, 0) / 1000);
+//    TMR_Enable(APB_TMR1, 0, 0xf);
+    
     *(uint32_t *)(0x40003014) = 0x1;
     *(uint32_t *)(0x40003018) = 0x1;
     *(uint32_t *)(0x40003020) = 0x9;
-    *(uint32_t *)(0x40003024) = (1000000*128/20);
+    *(uint32_t *)(0x40003024) = (1000000*128/1000);
     *(uint32_t *)(0x4000301c) = 0x1;
-
 #else
     #error unknown or unsupported chip family
 #endif
-	platform_set_irq_callback(PLATFORM_CB_IRQ_TIMER1, timer2_isr, NULL);
+	platform_set_irq_callback(PLATFORM_CB_IRQ_TIMER1, timer1_isr, NULL);
 }
-static uint32_t timer2_isr(void *user_data)
+static uint32_t timer1_isr(void *user_data)
 {
     key_check();
     //platform_printf("t1\n");
 #if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
-    TMR_IntClr(APB_TMR2);
+    TMR_IntClr(APB_TMR1);
 #elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
-    TMR_IntClr(APB_TMR2, 0, 0xf);
+    *(uint32_t *)(0x40003018) = 0x1;
 #else
     #error unknown or unsupported chip family
 #endif
-
     return 0;
 }
 //extern int ir_transmit_fun(uint16_t addr,uint16_t data);
 void setup_peripherals(void)
 {
-    SYSCTRL_ClearClkGateMulti(0
-                            | (1 << SYSCTRL_ClkGate_APB_WDT));
-    config_uart(OSC_CLK_FREQ, 115200);
 
+    if (!IS_DEBUGGER_ATTACHED())
+    {
+        SYSCTRL_ClearClkGateMulti(0
+                                    | (1 << SYSCTRL_ClkGate_APB_WDT));        
+        // Watchdog will timeout after ~20sec
+        TMR_WatchDogEnable(TMR_CLK_FREQ * 10);
+    }    
+    config_uart(OSC_CLK_FREQ, 115200);
     t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_tx_mode,GIO_GPIO_32);
     // t_ir.init(IR_IR_MODE_IR_NEC,IR_MODE_TX,GIO_GPIO_9);
     GPIO_Key_Board_Init();
-    key_board_debug_register(key_print_debug_callback);
-
- //   test_id2 = key_combine_register(test_combine2, GET_ARRAY_SIZE(test_combine2));
-    //init_timer2();
-    if (!IS_DEBUGGER_ATTACHED())
-    {
-        // Watchdog will timeout after ~20sec
-      //  TMR_WatchDogEnable(TMR_CLK_FREQ * 10);
-    }
-
+    init_timer1();
 }
-
 
 uint32_t on_deep_sleep_wakeup(void *dummy, void *user_data)
 {
@@ -155,30 +144,18 @@ uint32_t query_deep_sleep_allowed(void *dummy, void *user_data)
     // TODO: return 0 if deep sleep is not allowed now; else deep sleep is allowed
     return 0;
 }
-static void timer_task(void *pdata)
-{
-    for(;;)
-    {
-        key_check();
-        //platform_printf("t0\n");
-        vTaskDelay(pdMS_TO_TICKS(1));
-    }
-}
-void xtimer_call(void);
+
 static void watchdog_task(void *pdata)
 {
-
-    unsigned int res = 0;
     for (;;)
     {
         TMR_WatchDogRestart();
+        //platform_printf("dog\n");
         vTaskDelay(pdMS_TO_TICKS(9000));
      }
 }
 
 trace_rtt_t trace_ctx = {0};
-
-
 int app_main()
 {
     static uint8_t sendflag = 0;
@@ -192,19 +169,13 @@ int app_main()
     platform_set_evt_callback(PLATFORM_CB_EVT_QUERY_DEEP_SLEEP_ALLOWED, query_deep_sleep_allowed, NULL);
     platform_set_evt_callback(PLATFORM_CB_EVT_PUTC, (f_platform_evt_cb)cb_putc, NULL);
     setup_peripherals();
-
     xTaskCreate(watchdog_task,
            "w",
            configMINIMAL_STACK_SIZE,
            NULL,
            (configMAX_PRIORITIES - 1),
            NULL);
-     xTaskCreate(timer_task,
-           "t",
-           configMINIMAL_STACK_SIZE,
-           NULL,
-           (configMAX_PRIORITIES - 1),
-           NULL);   
+    
     trace_rtt_init(&trace_ctx);
     platform_set_evt_callback(PLATFORM_CB_EVT_TRACE, (f_platform_evt_cb)cb_trace_rtt, &trace_ctx);
     // TODO: config trace mask

@@ -7,13 +7,10 @@
 //Enable this macro if it is a matrix keyboard
 #define USER_KEY_BOARD_MATRIX 1
 
+#define USER_KEY_DEBUG        0
+
 #define COMPLEX_TIMER_INTERVAL     20
 
-typedef enum
-{   
-  GPIO_PIN_RESET = 0u,
-  GPIO_PIN_SET = 1u,    
-} GPIO_PinState;
 #define KB_NULL         0
 #define KB_POWER        0x66
 #define KB_PAGE_UP      0x4B
@@ -31,6 +28,12 @@ typedef enum
 #define KB_VOLUME_UP    0x80
 #define KB_VOLUME_DOWN  0x81
 #define KB_VOICE_STOP   0x3F
+
+typedef enum
+{   
+  GPIO_PIN_RESET = 0u,
+  GPIO_PIN_SET = 1u,    
+} GPIO_PinState;
 
 enum key_id_hard_e {
     KB_HARD_K1 = 0, 

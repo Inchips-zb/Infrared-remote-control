@@ -9,8 +9,7 @@ typedef struct
 {
     keyFunc_t ketHardId;
     enum key_state_t state;
-     keyFunc_t keyId;
-    const char *intro;
+    keyFunc_t keyId;
     uint8_t count;
     void (*cbFun)(void);
 } keyFuncMap_t;
@@ -21,29 +20,28 @@ typedef struct
     const struct key_combine_t *pCombineTab;
     uint8_t size;
     keyFunc_t keyId;
-    const char *intro;
     void (*cbFun)(void);
 } keyCombineMap_t;
 
 static const struct key_combine_t key_ir_learn[] = {
-    { .id = KB_HARD_K4,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K1,   .state = KEY_PRESS_LONG },
     { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
 };
 static const struct key_combine_t key_adv_start[] = {
-    { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
-    { .id = KB_HARD_K6,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K9,   .state = KEY_PRESS },
+    { .id = KB_HARD_K9,  .state = KEY_RELEASE },
 };
 static const struct key_combine_t key_adv_stop[] = {
-    { .id = KB_HARD_K8,   .state = KEY_PRESS_LONG },
-    { .id = KB_HARD_K9,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K10,   .state = KEY_PRESS },
+    { .id = KB_HARD_K10,   .state = KEY_RELEASE },
 };
 static const struct key_combine_t key_power_on[] = {
-    { .id = KB_HARD_K11,  .state = KEY_PRESS_LONG },
-    { .id = KB_HARD_K12,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K11,  .state = KEY_PRESS },
+    { .id = KB_HARD_K11,  .state = KEY_RELEASE },
 };
 static const struct key_combine_t key_power_off[] = {
-    { .id = KB_HARD_K14,  .state = KEY_PRESS_LONG },
-    { .id = KB_HARD_K15,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K12,  .state = KEY_PRESS },
+    { .id = KB_HARD_K12,  .state = KEY_RELEASE },
 };
 
 static void cmbinetest1(void)
@@ -68,11 +66,11 @@ static void cmbinetest5(void)
 }
 static keyCombineMap_t keyCombineMap[] = 
 {
-    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_NULL,    "IR_LEARN"  ,  cmbinetest1}, // combine1
-    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_NULL,    "ADV_START" ,  cmbinetest2}, // combine1
-    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_NULL,    "ADV_STOP"  ,  cmbinetest3}, // combine1
-    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_NULL,    "POWER_ON"  ,  cmbinetest4}, // combine1
-    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,    "POWER_OFF" ,  cmbinetest5}, // combine1
+    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_NULL,   cmbinetest1}, // combine1
+    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_NULL,   cmbinetest2}, // combine2
+    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_NULL,   cmbinetest3}, // combine3
+    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_NULL,   cmbinetest4}, // combine4
+    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,   cmbinetest5}, // combine5
 };
 
 static void test16(void)
@@ -82,23 +80,23 @@ static void test16(void)
 
 static const keyFuncMap_t keyFuncMap[] = {
    //hard id       triger state   key_event id          key describe         
-    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,    "KB_LEFT"        ,  0,  NULL     }, // J1
-    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,    "KB_RIGHT"       ,  0,  NULL     }, // J2
-    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,    "KB_UP"          ,  0,  NULL     }, // J3
-    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,    "KB_DOWN"        ,  0,  NULL     }, // J4
-    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,    "KB_ENTER"       ,  0,  NULL     }, // J5
-    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,    "KB_EXIT"        ,  0,  NULL     }, // J6
-    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,    "KB_POWER"       ,  0,  NULL     }, // J7
-    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,    "KB_MENU"        ,  0,  NULL     }, // J8
-    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,    "KB_HOME"        ,  0,  NULL     }, // J9
-    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,    "KB_VOICE"       ,  0,  NULL     }, // J10
-    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,    "KB_VOLUME_MUTE" ,  0,  NULL     }, // J11
-    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,    "KB_VOLUME_UP"   ,  0,  NULL     }, // J12
-    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,    "KB_VOLUME_DOWN" ,  0,  NULL     }, // J13
-    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,    "KB_VOICE_STOP"  ,  0,  NULL     }, // J14
-    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,    "KB_PAGE_UP"     ,  0,  NULL     }, // J15
-    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,    "KB_PAGE_DOWN"   ,  0,  NULL     },  // J16
-    {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,    "KB_PAGE_DOWN"   ,  0,  test16     }  // J16
+    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,      0,  NULL     }, // J1
+    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,      0,  NULL     }, // J2
+    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,      0,  NULL     }, // J3
+    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,      0,  NULL     }, // J4
+    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,      0,  NULL     }, // J5
+    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,      0,  NULL     }, // J6
+    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,      0,  NULL     }, // J7
+    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,      0,  NULL     }, // J8
+    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,      0,  NULL     }, // J9
+    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,      0,  NULL     }, // J10
+    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,      0,  NULL     }, // J11
+    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,      0,  NULL     }, // J12
+    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,      0,  NULL     }, // J13
+    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,      0,  NULL     }, // J14
+    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      0,  NULL     }, // J15
+    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      0,  NULL     },  // J16
+    {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,      0,  test16     }  // J16
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -255,7 +253,12 @@ static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
     kb_check_event_callback();
 }
-
+#if USER_KEY_DEBUG
+void key_print_debug_callback(const char *str)
+{
+    platform_printf("%s\n", str);
+}
+#endif
 /*key GPIO init*/
 void GPIO_Key_Board_Init(void)
 {
@@ -285,6 +288,11 @@ void GPIO_Key_Board_Init(void)
     key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0);
 #endif
     combine_register();
+    
+#if USER_KEY_DEBUG    
+    key_board_debug_register(key_print_debug_callback);
+#endif    
+    
     complexKeyTimer = xTimerCreate("Complex Key",
                         pdMS_TO_TICKS(COMPLEX_TIMER_INTERVAL),
                         pdTRUE,
