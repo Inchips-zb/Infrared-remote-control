@@ -151,7 +151,7 @@ static print_debug_callback internal_print_debug; //Debug information output
 static unsigned int key_tick_ms; //tick
 static struct key_board_t obj;
 static struct key_private_t esig[KEY_MAX_NUM];
-static struct match_list_t combin_item[10];
+static struct match_list_t combin_item[KEY_COMBINE_NUM];
 
 static inline void debug(const char *func, int line, const char *message)
 {
@@ -178,7 +178,7 @@ int key_board_init(void)
 
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
     memset(&combine, 0, sizeof(combine));
-    memset(&combin_item[0], 0, 10*sizeof(struct match_list_t));
+    memset(&combin_item[0], 0, GET_ARRAY_SIZE(combin_item)*sizeof(struct match_list_t));
     combine.head.next = NULL;
 #endif
 
@@ -199,25 +199,13 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
         debug(__FUNCTION__, __LINE__, "exceed the max configure value [KEY_BOARD_MAX_NUM]");
         return NULL;
     }
-   // obj = malloc(sizeof(struct key_board_t));
-
-//    if(!obj)
-//    {
-//        debug(__FUNCTION__, __LINE__, "malloc failed");
-//        return NULL;
-//    }
 
     memset(&obj, 0, sizeof(struct key_board_t));
     key_board[handle_no_use] = &obj;
     obj.type = type;
     obj.sig_num = key_sig_n;
     obj.sig = &esig[0];
- //   platform_printf("obj.sig_num:%d,&obj.sig%p,&esig[0]:%p\r\n",obj.sig_num,obj.sig,&esig[0]);
-//    if(!obj->sig)
-//    {
-//        debug(__FUNCTION__, __LINE__, "malloc failed");
-//        return NULL;
-//    }
+    
     memset(obj.sig, 0, KEY_MAX_NUM * sizeof(struct key_private_t));
     for(i = 0;i < key_sig_n;i++)
     {
@@ -243,7 +231,6 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
         combine.interval = KEY_TIME_CHECK(KEY_DEFAULT_COMBINE_INTERVAL_TIME);
 #endif
-
         //Get the insertion position by taking the mold
         unsigned int idx, backup;
 
@@ -266,7 +253,6 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
         }
         key_hash_map[idx] = i;
     }
-
     if(obj.type == KEY_BOARD_MATRIX)
     {
         obj.ctrl_num = key_ctrl_n;
@@ -280,37 +266,6 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
     }
 
     return &obj;
-}
-
-void key_board_unregister(struct key_board_t *obj)
-{
-    unsigned int i;
-
-    for(i = 0;i < GET_ARRAY_SIZE(key_board) && key_board[i];i++)
-    {
-        if(obj == key_board[i])
-        {
-            //free(obj->sig);
-            obj->sig = NULL;
-            //free(obj);
-            key_board[i] = NULL;
-        }
-    }
-}
-
-void key_board_destroy(void)
-{
-    struct key_board_t *obj;
-    unsigned int i;
-
-    for(i = 0;i < GET_ARRAY_SIZE(key_board) && key_board[i];i++)
-    {
-        obj = key_board[i];
-        //free(obj->sig);
-        obj->sig = NULL;
-        //free(obj);
-        key_board[i] = NULL;
-    }
 }
 
 static inline unsigned int key_event(struct event_cnt_t *ev)
@@ -403,17 +358,11 @@ static unsigned char item_count = 0;
 int key_combine_register(const struct key_combine_t c[], unsigned int n)
 {
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
- 
-//    struct match_list_t *item;
-//    item = malloc(sizeof(struct match_list_t));
-//    if(!item)
-//    {
-//        debug(__FUNCTION__, __LINE__, "malloc failed");
-//        return 0;
-//    }
-
-    if(item_count >= GET_ARRAY_SIZE(combin_item)-1)
+    if(item_count >= KEY_COMBINE_NUM-1)
+    {
+        debug(__FUNCTION__, __LINE__, "the combine key number overflow");
         return -1;
+    }
     combin_item[item_count].match = c;
     combin_item[item_count].n = n;
     combin_item[item_count].flag &= 0;
@@ -439,7 +388,6 @@ void key_combine_unregister(unsigned int id)
     {
         item = item->next;
     }
-
     if(item->next)
     {
         del = item->next;

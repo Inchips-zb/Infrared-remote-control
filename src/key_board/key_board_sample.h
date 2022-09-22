@@ -31,10 +31,20 @@
 
 typedef enum
 {   
-  GPIO_PIN_RESET = 0u,
-  GPIO_PIN_SET = 1u,    
-} GPIO_PinState;
-
+    GPIO_PIN_RESET = 0u,
+    GPIO_PIN_SET = 1u,    
+}GPIO_PinState;
+typedef enum
+{   
+    MULTI_CLICK_NONE = 0,
+    DOUBLE_CLICK = 2u   ,
+    TRIPLE_CLICK        , 
+    FOUR_CLICK          ,   
+    FIVE_CLICK          ,
+    SIX_CLICK           ,
+    SEVEN_CLICK         ,
+    EIGHT,CLICK    
+} eClickState;
 enum key_id_hard_e {
     KB_HARD_K1 = 0, 
     KB_HARD_K2    , 

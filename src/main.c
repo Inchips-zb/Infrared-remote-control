@@ -154,7 +154,6 @@ static void watchdog_task(void *pdata)
         vTaskDelay(pdMS_TO_TICKS(9000));
      }
 }
-
 trace_rtt_t trace_ctx = {0};
 int app_main()
 {

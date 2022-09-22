@@ -10,8 +10,11 @@
 #define KEY_BOARD_MAX_NUM                             (1)
 
 //max key number
-#define KEY_MAX_NUM                                   (16)
-
+#define KEY_COL_NUM                                   (4)
+#define KEY_ROW_NUM                                   (4)
+#define KEY_MAX_NUM                                   (KEY_COL_NUM*KEY_ROW_NUM)
+//max combine ke number
+#define KEY_COMBINE_NUM                               (5)
 //default long press timer
 #define KEY_DEFAULT_LONG_TRRIGER_TIME                 (2000)
 

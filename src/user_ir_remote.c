@@ -254,8 +254,7 @@ static uint32_t gpio_isr(void *user_data)
         else //Falling edge
         {
              //get symbol peroid            
-            t_ir_data_struct.t_ir_rx_symbol[t_ir_data_struct.symbol_num].symbol_period = (uint16_t)( current_tick-last_tick) ;
-            
+            t_ir_data_struct.t_ir_rx_symbol[t_ir_data_struct.symbol_num].symbol_period = (uint16_t)( current_tick-last_tick) ;           
             //if symbol peroid between 4000 and 5000ms, considered is start signal,or between 2000 and 2500ms,considered is repeat code
             if((((4000 < t_ir_data_struct.t_ir_rx_symbol[0].symbol_period)  &&
                 (5000 > t_ir_data_struct.t_ir_rx_symbol[0].symbol_period))  ||
@@ -289,7 +288,6 @@ static uint32_t gpio_isr(void *user_data)
         last_tick = current_tick;
     }
     GIO_ClearAllIntStatus();
-
     return 0;
 }
 static void ir_soft_rxpin_init(GIO_Index_t channel_index)
