@@ -103,7 +103,7 @@ int key_board_init(void);
 * @param    key_ctrl_n: Number of control lines (only required when the type is matrix keyboard)
 * @retval   Keyboard object pointer registered successfully, and NULL returned in case of failure
 */
-struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n);
+struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n,void (*fun)(void));
 
 /**
 * @brief    Uninstall a registered keyboard

@@ -73,7 +73,7 @@ static uint32_t timer1_isr(void *user_data);
 static void init_timer1(void)
 {
     SYSCTRL_ClearClkGateMulti(0
-                                | (1 << SYSCTRL_ClkGate_APB_TMR2));
+                                | (1 << SYSCTRL_ClkGate_APB_TMR1));
 #if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
     // setup timer 1: 40us (25kHz)
     TMR_SetCMP(APB_TMR1, TMR_CLK_FREQ / 25000);
@@ -82,17 +82,12 @@ static void init_timer1(void)
     TMR_Reload(APB_TMR1);
     TMR_Enable(APB_TMR1);
 #elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
-    // setup channel 0 timer 1: 0.5s (2Hz)
-//    SYSCTRL_SelectTimerClk(TMR_PORT_1, SYSCTRL_TMR_CLK_32k); 
-//    TMR_SetOpMode(APB_TMR1, 0, TMR_CTL_OP_MODE_32BIT_TIMER_x1, TMR_CLK_MODE_EXTERNAL, 0);
-//    TMR_SetReload(APB_TMR1, 0, TMR_GetClk(APB_TMR2, 0) / 1000);
-//    TMR_Enable(APB_TMR1, 0, 0xf);
-    
-    *(uint32_t *)(0x40003014) = 0x1;
-    *(uint32_t *)(0x40003018) = 0x1;
-    *(uint32_t *)(0x40003020) = 0x9;
-    *(uint32_t *)(0x40003024) = (1000000*128/1000);
-    *(uint32_t *)(0x4000301c) = 0x1;
+    SYSCTRL_SelectTimerClk(TMR_PORT_1, SYSCTRL_TMR_CLK_OSC_DIV_4); 
+    TMR_SetOpMode(APB_TMR1, 0, TMR_CTL_OP_MODE_32BIT_TIMER_x1, TMR_CLK_MODE_EXTERNAL, 0);
+    TMR_SetReload(APB_TMR1, 0, TMR_GetClk(APB_TMR1,0) / KEY_SCAN_RATE);
+    TMR_IntEnable(APB_TMR1, 0, 0x1);
+    TMR_Enable(APB_TMR1, 0, 0x1);
+   // platform_printf("TMR_GetClk:%d\n",TMR_GetClk(APB_TMR1,0));
 #else
     #error unknown or unsupported chip family
 #endif
@@ -101,11 +96,10 @@ static void init_timer1(void)
 static uint32_t timer1_isr(void *user_data)
 {
     key_check();
-    //platform_printf("t1\n");
 #if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
     TMR_IntClr(APB_TMR1);
 #elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
-    *(uint32_t *)(0x40003018) = 0x1;
+    TMR_IntClr(APB_TMR1, 0, 0x1);
 #else
     #error unknown or unsupported chip family
 #endif

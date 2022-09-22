@@ -1,3 +1,5 @@
----- combine.interval Matches (2 in 1 files) ----
-Key_board.c (key_board):        combine.interval = KEY_TIME_CHECK(KEY_DEFAULT_COMBINE_INTERVAL_TIME);
-Key_board.c (key_board):                combine.timecnt = combine.interval + key_tick_ms;
+---- key_board_register Matches (4 in 3 files) ----
+key_board.c (key_board):struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n,void (*fun)(void))
+key_board.h (key_board):struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n);
+key_board_sample.c (key_board):    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),kb_check_event_callback);
+key_board_sample.c (key_board):    key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0,(void *)NULL);

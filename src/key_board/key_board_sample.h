@@ -8,7 +8,8 @@
 #define USER_KEY_BOARD_MATRIX 1
 
 #define USER_KEY_DEBUG        0
-
+//hz 1ms
+#define KEY_SCAN_RATE           (1000)
 #define COMPLEX_TIMER_INTERVAL     20
 
 #define KB_NULL         0

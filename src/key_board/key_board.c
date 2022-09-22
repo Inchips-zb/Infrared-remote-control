@@ -135,15 +135,18 @@ struct {
 
 struct key_board_t {
     enum key_board_type_t type;                //Keyboard Type
-
     unsigned int sig_num;                      //Number of signal lines
     struct key_private_t *sig;                 //Relevant information of signal line
-
     unsigned int ctrl_num;                     //Number of control lines
     unsigned int sig_per_ctrl;                 //Number of signal lines on each control line
     struct key_public_ctrl_t *ctrl;            //Relevant information of control line
+    bool bEventHappen;
+	void (*cbFun)(void);
 };
-
+typedef struct{
+    bool bEventHappen;
+	void (*cbFun)(void);
+}key_app_t;
 static struct key_board_t *key_board[KEY_BOARD_MAX_NUM];
 static unsigned int key_hash_map[KEY_MAX_NUM]; //Used to quickly find the object of the key according to the id (linear detection method)
 static unsigned int key_press_count; //Used to record the count of keys currently pressed
@@ -152,7 +155,7 @@ static unsigned int key_tick_ms; //tick
 static struct key_board_t obj;
 static struct key_private_t esig[KEY_MAX_NUM];
 static struct match_list_t combin_item[KEY_COMBINE_NUM];
-
+static key_app_t t_key_app;
 static inline void debug(const char *func, int line, const char *message)
 {
     #include <stdio.h>
@@ -175,19 +178,18 @@ int key_board_init(void)
         key_hash_map[i] = (unsigned int)-1;
     }
     key_press_count = 0;
-
+    t_key_app.bEventHappen = false;
+    t_key_app.cbFun = (void*)NULL;
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
     memset(&combine, 0, sizeof(combine));
     memset(&combin_item[0], 0, GET_ARRAY_SIZE(combin_item)*sizeof(struct match_list_t));
     combine.head.next = NULL;
 #endif
-
     key_tick_ms = 0;
-
     return 0;
 }
 
-struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n)
+struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n,void (*fun)(void))
 {
     //struct key_board_t *obj;
     unsigned int handle_no_use;
@@ -264,7 +266,7 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
             ctrl[i].set(ctrl[i].pin_desc, false);
         }
     }
-
+    t_key_app.cbFun = fun;  //Registering Callbacks
     return &obj;
 }
 
@@ -377,25 +379,6 @@ int key_combine_register(const struct key_combine_t c[], unsigned int n)
 #endif
 }
 
-void key_combine_unregister(unsigned int id)
-{
-#if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
-    struct match_list_t *item;
-    struct match_list_t *del;
-
-    item = &combine.head;
-    while(item->next && (item->next != (struct match_list_t *)id))
-    {
-        item = item->next;
-    }
-    if(item->next)
-    {
-        del = item->next;
-        item->next = item->next->next;
-        //free(del);
-    }
-#endif
-}
 
 unsigned int key_check_combine_state(int id)
 {
@@ -432,8 +415,6 @@ static inline void key_check_combine_pre(void)
 static inline void key_check_combine(struct key_private_t *sig)
 {
     struct match_list_t *item;
-    bool flag;
-    static unsigned char uGetFlag = 0;
     item = combine.head.next;
     while(item)
     {
@@ -452,7 +433,9 @@ static inline void key_check_combine(struct key_private_t *sig)
                     {
                         item->flag &= 0;
                         item->match_count = 0;
+						t_key_app.bEventHappen = true;
                         ++item->combine_event.wr_cnt;
+
                     }              
                 }
             }
@@ -479,9 +462,9 @@ static inline void key_check_long(struct key_private_t *sig)
             {
                 //Trigger only once
                 sig->long_press.trriger_flag = true;
-
                 sig->state |= KEY_PRESS_LONG;
                 ++sig->press_long_event.wr_cnt;
+				t_key_app.bEventHappen = true;
             }
         }
     }
@@ -491,6 +474,7 @@ static inline void key_check_long(struct key_private_t *sig)
         {
             sig->state |= KEY_RELEASE_LONG;
             ++sig->release_long_event.wr_cnt;
+			t_key_app.bEventHappen = true;
         }
     }
 }
@@ -507,6 +491,7 @@ static inline void key_check_multi(struct key_private_t *sig)
         {
             sig->state |= KEY_PRESS_MULTI;
             ++sig->press_multi_event.wr_cnt;
+			t_key_app.bEventHappen = true;
         }
         sig->multi_click_press.timecnt = sig->multi_click_press.interval + key_tick_ms;
     }
@@ -552,7 +537,7 @@ static inline void key_check_continuous(struct key_private_t *sig)
         {
             sig->state |= KEY_PRESS_CONTINUOUS;
             ++sig->press_continuous_event.wr_cnt;
-
+			t_key_app.bEventHappen = true;
             sig->continuous.press_time = sig->continuous.trriger_period + key_tick_ms;
         }
     }
@@ -561,7 +546,7 @@ static inline void key_check_continuous(struct key_private_t *sig)
 
 void key_check(void)
 {
-    struct key_board_t *obj;
+    struct key_board_t *pObj;
     unsigned int i, j;
     unsigned int last, next;
     //struct key_pin_t *pdescx,*pdescy;
@@ -571,94 +556,102 @@ void key_check(void)
 #endif
     for(i = 0;i < GET_ARRAY_SIZE(key_board) && key_board[i];i++)
     {
-        obj = key_board[i];
+        pObj = key_board[i];
 
-        last = obj->ctrl_num - 1;
+        last = pObj->ctrl_num - 1;
         next = 0;
-        for(j = 0;j < obj->sig_num;j++)
+        for(j = 0;j < pObj->sig_num;j++)
         {
-            if((obj->type == KEY_BOARD_MATRIX) && ((j % obj->sig_per_ctrl) == 0))
+            if((pObj->type == KEY_BOARD_MATRIX) && ((j % pObj->sig_per_ctrl) == 0))
             {
                 //The last scanned control line is pulled to an invalid level
-                obj->ctrl[last].set(obj->ctrl[last].pin_desc, false);
+                pObj->ctrl[last].set(pObj->ctrl[last].pin_desc, false);
 
-                last = next = j / obj->sig_per_ctrl;
+                last = next = j / pObj->sig_per_ctrl;
 
                 //Pull the control line to be scanned to the active level
-                obj->ctrl[next].set(obj->ctrl[next].pin_desc, true);
+                pObj->ctrl[next].set(pObj->ctrl[next].pin_desc, true);
             }
-            obj->sig[j].this_level = obj->sig[j].property->get(obj->sig[j].property->pin_desc);
-            switch((obj->sig[j].this_level << 4) | (obj->sig[j].last_level))
+            pObj->sig[j].this_level = pObj->sig[j].property->get(pObj->sig[j].property->pin_desc);
+            switch((pObj->sig[j].this_level << 4) | (pObj->sig[j].last_level))
             {
                 case 0x00:
                     //Clear 0 to solve the BUG caused by multiple debounce time
-                    obj->sig[j].debounce_time = 0;
-                    obj->sig[j].state = KEY_NONE;
+                    pObj->sig[j].debounce_time = 0;
+                    pObj->sig[j].state = KEY_NONE;
                     break;
                 case 0x01:
-                    if((0 == obj->sig[j].init_debounce_time) ||
-                       (obj->sig[j].debounce_time && (key_tick_ms - obj->sig[j].debounce_time < KEY_MAX_TIME)))
+                    if((0 == pObj->sig[j].init_debounce_time) ||
+                       (pObj->sig[j].debounce_time && (key_tick_ms - pObj->sig[j].debounce_time < KEY_MAX_TIME)))
                     {
                         //No need to debounce or in the debounce time state and reach the shake elimination timing
-                        obj->sig[j].state = KEY_RELEASE;
-                        ++obj->sig[j].release_event.wr_cnt;
+                        pObj->sig[j].state = KEY_RELEASE;
+                        ++pObj->sig[j].release_event.wr_cnt;
+						t_key_app.bEventHappen = true;
                     }
-                    else if(0 == obj->sig[j].debounce_time)
+                    else if(0 == pObj->sig[j].debounce_time)
                     {
-                        obj->sig[j].state = KEY_PRESSING_DEBOUNCING;
+                        pObj->sig[j].state = KEY_PRESSING_DEBOUNCING;
                         //Reset the debounce timing
-                        obj->sig[j].debounce_time = obj->sig[j].init_debounce_time + key_tick_ms;
+                        pObj->sig[j].debounce_time = pObj->sig[j].init_debounce_time + key_tick_ms;
                     }
                     break;
                 case 0x10:
-                    if((0 == obj->sig[j].init_debounce_time) ||
-                       (obj->sig[j].debounce_time && (key_tick_ms - obj->sig[j].debounce_time < KEY_MAX_TIME)))
+                    if((0 == pObj->sig[j].init_debounce_time) ||
+                       (pObj->sig[j].debounce_time && (key_tick_ms - pObj->sig[j].debounce_time < KEY_MAX_TIME)))
                     {
                         //pdescx = (struct key_pin_t *)(obj->sig[j].property->pin_desc);
                        // pdescy = (struct key_pin_t *)(obj->ctrl[next].pin_desc);
-                        obj->sig[j].state = KEY_PRESS;
+                        pObj->sig[j].state = KEY_PRESS;
+						t_key_app.bEventHappen = true;
                        // platform_printf("x:%d,y:%d\r\n",pdescx->pin,pdescy->pin);
-                        ++obj->sig[j].press_event.wr_cnt;
+                        ++pObj->sig[j].press_event.wr_cnt;
                     }
-                    else if(0 == obj->sig[j].debounce_time)
+                    else if(0 == pObj->sig[j].debounce_time)
                     {
-                        obj->sig[j].state = KEY_PRESS_DEBOUNCING;
-                        obj->sig[j].debounce_time = obj->sig[j].init_debounce_time + key_tick_ms;
+                        pObj->sig[j].state = KEY_PRESS_DEBOUNCING;
+                        pObj->sig[j].debounce_time = pObj->sig[j].init_debounce_time + key_tick_ms;
                     }
                     break;
                 case 0x11:
                     //Clear 0 to solve the BUG caused by multiple debounce time
-                    obj->sig[j].debounce_time = 0;
+                    pObj->sig[j].debounce_time = 0;
 
-                    obj->sig[j].state = KEY_PRESSING;
-                    ++obj->sig[j].pressing_event.wr_cnt;
+                    pObj->sig[j].state = KEY_PRESSING;
+                    ++pObj->sig[j].pressing_event.wr_cnt;
+					t_key_app.bEventHappen = true;
                     break;
             }
 
             //If it is in the process of dithering elimination, the current level state will not be saved
-            if(!(obj->sig[j].state & (KEY_PRESS_DEBOUNCING | KEY_PRESSING_DEBOUNCING)))
+            if(!(pObj->sig[j].state & (KEY_PRESS_DEBOUNCING | KEY_PRESSING_DEBOUNCING)))
             {
-                obj->sig[j].last_level = obj->sig[j].this_level;
+                pObj->sig[j].last_level = pObj->sig[j].this_level;
             }
 
-            key_press_count_stats(&obj->sig[j]);
+            key_press_count_stats(&pObj->sig[j]);
 
 #if (KEY_LONG_SUPPORT == KEY_ENABLE)
-            key_check_long(&obj->sig[j]);
+            key_check_long(&pObj->sig[j]);
 #endif
 
 #if (KEY_MULTI_SUPPORT == KEY_ENABLE)
-            key_check_multi(&obj->sig[j]);
+            key_check_multi(&pObj->sig[j]);
 #endif
 
 #if (KEY_CONTINUOUS_SUPPORT == KEY_ENABLE)
-            key_check_continuous(&obj->sig[j]);
+            key_check_continuous(&pObj->sig[j]);
 #endif
 
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
-            key_check_combine(&obj->sig[j]);
+            key_check_combine(&pObj->sig[j]);
 #endif
-        }
+	if((t_key_app.bEventHappen)&&(NULL != t_key_app.cbFun))
+	{
+		t_key_app.cbFun();
+		t_key_app.bEventHappen = false;
+	}
+		}
     }
 }
 

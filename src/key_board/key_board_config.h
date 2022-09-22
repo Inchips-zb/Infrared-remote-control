@@ -4,8 +4,11 @@
 #define KEY_ENABLE    (1)
 #define KEY_DISABLE   (0)
 
+#define KEY_TRIG_REPORT  (1)
+#define KEY_TRIG_QUERY   (0)
 //\\\\\\\\\\\\\\\\\\\\\\\\\config item\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+#define KEY_EVENT_TRIG_MODE         KEY_TRIG_REPORT
 //max key bord number
 #define KEY_BOARD_MAX_NUM                             (1)
 

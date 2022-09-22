@@ -102,8 +102,7 @@ static const keyFuncMap_t keyFuncMap[] = {
     {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  NULL     }, // J15
     {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  NULL     },  // J16
     {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,      MULTI_CLICK_NONE,  test16_press_long   },  // J16
-    {KB_HARD_K16,   KEY_PRESS_MULTI,KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16
-    
+    {KB_HARD_K16,   KEY_PRESS_MULTI,KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -254,12 +253,13 @@ static void combine_register(void)
         }
     }
 }
+#if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
 static TimerHandle_t complexKeyTimer = 0;
-
 static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
     kb_check_event_callback();
 }
+#endif
 #if USER_KEY_DEBUG
 void key_print_debug_callback(const char *str)
 {
@@ -289,10 +289,15 @@ void GPIO_Key_Board_Init(void)
     }
 #endif
     key_board_init();
+
 #if (USER_KEY_BOARD_MATRIX)
-    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl));
+    #if (KEY_EVENT_TRIG_MODE == KEY_TRIG_REPORT)
+    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),kb_check_event_callback);
+    #else
+    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),(void*)NULL);
+    #endif
 #else
-    key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0);
+    key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0,(void *)NULL);
 #endif
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
     combine_register();
@@ -300,11 +305,12 @@ void GPIO_Key_Board_Init(void)
 #if USER_KEY_DEBUG    
     key_board_debug_register(key_print_debug_callback);
 #endif    
-    
+    #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
     complexKeyTimer = xTimerCreate("Complex Key",
                         pdMS_TO_TICKS(COMPLEX_TIMER_INTERVAL),
                         pdTRUE,
                         NULL,
                         ComplexKeyCallback);
     xTimerStart(complexKeyTimer, portMAX_DELAY);
+   #endif
 }
