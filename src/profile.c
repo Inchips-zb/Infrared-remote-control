@@ -64,7 +64,7 @@ static void user_msg_handler(uint32_t msg_id, void *data, uint16_t size)
     {
         // add your code
         case USER_MSG_ID_HARD_KEY:
-           // platform_printf("HardkeyId:0x%02x,size:%d\n",*(uint8_t*)data,size);
+            platform_printf("HardkeyId:0x%02x\n",*(uint8_t*)data);
             t_ir.transmit_data((uint16_t)USER_MSG_ID_HARD_KEY,*(uint16_t*)data);
             break;
         case USER_MSG_ID_IR_KEY:
