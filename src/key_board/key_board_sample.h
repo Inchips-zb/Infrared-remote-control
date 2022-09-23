@@ -11,6 +11,7 @@
 //hz 1ms
 #define KEY_SCAN_RATE           (1000)
 #define COMPLEX_TIMER_INTERVAL     20
+#define CB_FUN_NULL             (void*)NULL
 
 #define KB_NULL         0
 #define KB_POWER        0x66

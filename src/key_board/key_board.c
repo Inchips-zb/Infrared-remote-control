@@ -140,8 +140,6 @@ struct key_board_t {
     unsigned int ctrl_num;                     //Number of control lines
     unsigned int sig_per_ctrl;                 //Number of signal lines on each control line
     struct key_public_ctrl_t *ctrl;            //Relevant information of control line
-    bool bEventHappen;
-	void (*cbFun)(void);
 };
 typedef struct{
     bool bEventHappen;
@@ -201,7 +199,6 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
         debug(__FUNCTION__, __LINE__, "exceed the max configure value [KEY_BOARD_MAX_NUM]");
         return NULL;
     }
-
     memset(&obj, 0, sizeof(struct key_board_t));
     key_board[handle_no_use] = &obj;
     obj.type = type;
@@ -266,7 +263,11 @@ struct key_board_t *key_board_register(enum key_board_type_t type, const struct 
             ctrl[i].set(ctrl[i].pin_desc, false);
         }
     }
+ #if (KEY_EVENT_TRIG_MODE == KEY_TRIG_REPORT)    
     t_key_app.cbFun = fun;  //Registering Callbacks
+ #else
+    t_key_app.cbFun = (void*)NULL;
+    #endif
     return &obj;
 }
 

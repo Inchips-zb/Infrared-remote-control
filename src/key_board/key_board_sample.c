@@ -85,22 +85,22 @@ static void test16_triple_click_press(void)
 }
 static const keyFuncMap_t keyFuncMap[] = {
    //hard id       triger state   key_event id          key describe         
-    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,      MULTI_CLICK_NONE,  NULL     }, // J1
-    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,      MULTI_CLICK_NONE,  NULL     }, // J2
-    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,      MULTI_CLICK_NONE,  NULL     }, // J3
-    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,      MULTI_CLICK_NONE,  NULL     }, // J4
-    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,      MULTI_CLICK_NONE,  NULL     }, // J5
-    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,      MULTI_CLICK_NONE,  NULL     }, // J6
-    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,      MULTI_CLICK_NONE,  NULL     }, // J7
-    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,      MULTI_CLICK_NONE,  NULL     }, // J8
-    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,      MULTI_CLICK_NONE,  NULL     }, // J9
-    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,      MULTI_CLICK_NONE,  NULL     }, // J10
-    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,      MULTI_CLICK_NONE,  NULL     }, // J11
-    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,      MULTI_CLICK_NONE,  NULL     }, // J12
-    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,      MULTI_CLICK_NONE,  NULL     }, // J13
-    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,      MULTI_CLICK_NONE,  NULL     }, // J14
-    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  NULL     }, // J15
-    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  NULL     },  // J16
+    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J1
+    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J2
+    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J3
+    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J4
+    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J5
+    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J6
+    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J7
+    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J8
+    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J9
+    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J10
+    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J11
+    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J12
+    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J13
+    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J14
+    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J15
+    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     },  // J16
     {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,      MULTI_CLICK_NONE,  test16_press_long   },  // J16
     {KB_HARD_K16,   KEY_PRESS_MULTI,KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
 };
@@ -224,7 +224,7 @@ static void kb_check_event_callback(void)
         }
        if(bFlag)
        {
-            if(NULL != keyFuncMap[i].cbFun)
+            if(CB_FUN_NULL != keyFuncMap[i].cbFun)
                 keyFuncMap[i].cbFun();
             if(KB_NULL != keyFuncMap[i].keyId)
                 btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
@@ -236,7 +236,7 @@ static void kb_check_event_callback(void)
     {
         if(keyCombineMap[i].combineKeyId && key_check_combine_state(keyCombineMap[i].combineKeyId))
         {
-            if(NULL != keyCombineMap[i].cbFun)keyCombineMap[i].cbFun();
+            if(CB_FUN_NULL != keyCombineMap[i].cbFun)keyCombineMap[i].cbFun();
             if(KB_NULL != keyCombineMap[i].keyId) 
                 btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyCombineMap[i].keyId,sizeof(keyCombineMap[i].keyId));
         }
@@ -255,9 +255,10 @@ static void combine_register(void)
 }
 #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
 static TimerHandle_t complexKeyTimer = 0;
+void (*cbFunSwTimer) (void);
 static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
-    kb_check_event_callback();
+    cbFunSwTimer();
 }
 #endif
 #if USER_KEY_DEBUG
@@ -294,10 +295,10 @@ void GPIO_Key_Board_Init(void)
     #if (KEY_EVENT_TRIG_MODE == KEY_TRIG_REPORT)
     key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),kb_check_event_callback);
     #else
-    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),(void*)NULL);
+    key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),CB_FUN_NULL);
     #endif
 #else
-    key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0,(void *)NULL);
+    key_board_register(KEY_BOARD_NORMAL, key_public_sig, GET_ARRAY_SIZE(key_public_sig), NULL, 0,CB_FUN_NULL);
 #endif
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
     combine_register();
@@ -305,7 +306,8 @@ void GPIO_Key_Board_Init(void)
 #if USER_KEY_DEBUG    
     key_board_debug_register(key_print_debug_callback);
 #endif    
-    #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
+    #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)  
+    cbFunSwTimer = kb_check_event_callback;   
     complexKeyTimer = xTimerCreate("Complex Key",
                         pdMS_TO_TICKS(COMPLEX_TIMER_INTERVAL),
                         pdTRUE,
