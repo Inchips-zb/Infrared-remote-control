@@ -361,7 +361,7 @@ static unsigned char item_count = 0;
 int key_combine_register(const struct key_combine_t c[], unsigned int n)
 {
 #if (KEY_COMBINE_SUPPORT == KEY_ENABLE)
-    if(item_count >= KEY_COMBINE_NUM-1)
+    if(item_count >= KEY_COMBINE_NUM)
     {
         debug(__FUNCTION__, __LINE__, "the combine key number overflow");
         return -1;
@@ -379,7 +379,6 @@ int key_combine_register(const struct key_combine_t c[], unsigned int n)
     return 0;
 #endif
 }
-
 
 unsigned int key_check_combine_state(int id)
 {
@@ -429,7 +428,7 @@ static inline void key_check_combine(struct key_private_t *sig)
                 if(!(item->flag & (1<<i)))
                 {                 
                     item->flag |= 1<<i;
-//                  platform_printf("0x%02x,%d,%d\n",item->flag,item->match_count,item->n);
+//                    platform_printf("0x%02x,%d,%d\n",item->flag,item->match_count,item->n);
                     if(++item->match_count == item->n)
                     {
                         item->flag &= 0;

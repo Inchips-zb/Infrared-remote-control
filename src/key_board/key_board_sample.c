@@ -29,20 +29,20 @@ static const struct key_combine_t key_ir_learn[] = {
     { .id = KB_HARD_K5,   .state = KEY_PRESS_LONG },
 };
 static const struct key_combine_t key_adv_start[] = {
-    { .id = KB_HARD_K9,   .state = KEY_PRESS },
-    { .id = KB_HARD_K9,  .state = KEY_RELEASE },
+    { .id = KB_HARD_K8,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K9,  .state = KEY_PRESS_LONG },
 };
 static const struct key_combine_t key_adv_stop[] = {
-    { .id = KB_HARD_K10,   .state = KEY_PRESS },
-    { .id = KB_HARD_K10,   .state = KEY_RELEASE },
+    { .id = KB_HARD_K9,   .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K10,   .state = KEY_PRESS_LONG },
 };
 static const struct key_combine_t key_power_on[] = {
-    { .id = KB_HARD_K11,  .state = KEY_PRESS },
-    { .id = KB_HARD_K11,  .state = KEY_RELEASE },
+    { .id = KB_HARD_K11,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K12,  .state = KEY_PRESS_LONG },
 };
 static const struct key_combine_t key_power_off[] = {
-    { .id = KB_HARD_K12,  .state = KEY_PRESS },
-    { .id = KB_HARD_K12,  .state = KEY_RELEASE },
+    { .id = KB_HARD_K12,  .state = KEY_PRESS_LONG },
+    { .id = KB_HARD_K13,  .state = KEY_PRESS_LONG },
 };
 
 static void cmbinetest1(void)
@@ -75,9 +75,13 @@ static keyCombineMap_t keyCombineMap[] =
     {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,   cmbinetest5}, // combine5
 };
 #endif
-static void test16_press_long(void)
+static void test14_press_continou(void)
 {
-    platform_printf("k16 press_long\n");
+    platform_printf("k14 press_continou\n");
+}
+static void test15_press_long(void)
+{
+    platform_printf("k15 press_long\n");
 }
 static void test16_triple_click_press(void)
 {
@@ -101,8 +105,10 @@ static const keyFuncMap_t keyFuncMap[] = {
     {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J14
     {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J15
     {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     },  // J16
-    {KB_HARD_K16,   KEY_PRESS_LONG, KB_NULL        ,      MULTI_CLICK_NONE,  test16_press_long   },  // J16
-    {KB_HARD_K16,   KEY_PRESS_MULTI,KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
+    
+    {KB_HARD_K14,   KEY_PRESS_CONTINUOUS,   KB_NULL        ,      MULTI_CLICK_NONE,  test14_press_continou   },  // J16
+    {KB_HARD_K15,   KEY_PRESS_LONG,         KB_NULL        ,      MULTI_CLICK_NONE,  test15_press_long   },  // J16
+    {KB_HARD_K16,   KEY_PRESS_MULTI,        KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -268,6 +274,7 @@ void key_print_debug_callback(const char *str)
 }
 #endif
 /*key GPIO init*/
+
 void GPIO_Key_Board_Init(void)
 {
     unsigned int i;
