@@ -118,7 +118,7 @@ void setup_peripherals(void)
     }    
     config_uart(OSC_CLK_FREQ, 115200);
     t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_tx_mode,GIO_GPIO_32);
-    // t_ir.init(IR_IR_MODE_IR_NEC,IR_MODE_TX,GIO_GPIO_9);
+    t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_rx_mode,GIO_GPIO_33);
     GPIO_Key_Board_Init();
     init_timer1();
 }

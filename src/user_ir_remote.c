@@ -111,7 +111,7 @@ static void user_ir_device_init(IR_IrMode_e mode,IR_TxRxMode_e tx_rx_mode,GIO_In
 #if 0 == IR_RX_HARD
     if(IR_txrx_mode_rx_mode == tx_rx_mode)
     {
-        platform_printf("Ir rx soft\n");
+        platform_printf("Ir rx soft:%d\n",irpin);
         t_ir_data_struct.symbol_num  = 0;
         ir_soft_rxpin_init(irpin);
         return;
@@ -225,10 +225,11 @@ static int NEC_Decode(ir_rx_symbol_t symbol_buf[], int symbol_num,ir_key_t *ir_k
         ir_key->state = KEY_STATE_NONE;
         return 0;
     }
-    //platform_printf("num:%d \n",symbol_num);
+//    platform_printf("num:%d \n",symbol_num);
     if(decode_complete_flag)
     {
         btstack_push_user_msg(USER_MSG_ID_IR_KEY, NULL,0);
+        decode_complete_flag = 0;
     }
     return 1;
 }
@@ -237,8 +238,7 @@ static uint32_t gpio_isr(void *user_data)
 {
     uint64_t current_tick = platform_get_us_time();//record into times
     static uint64_t last_tick = 0;
-    uint32_t current = GIO_GetAllIntStatus(); //get io interrupt status
-    if (current & (1 << t_ir_data_struct.rx_io_pin)) //if ir rx int
+    if (GIO_GetIntStatus(t_ir_data_struct.rx_io_pin) ) //if ir rx int
     {            
         if(GIO_ReadValue(t_ir_data_struct.rx_io_pin)) //Rising edge
         {
@@ -253,7 +253,7 @@ static uint32_t gpio_isr(void *user_data)
         }
         else //Falling edge
         {
-             //get symbol peroid            
+             //get symbol peroid     
             t_ir_data_struct.t_ir_rx_symbol[t_ir_data_struct.symbol_num].symbol_period = (uint16_t)( current_tick-last_tick) ;           
             //if symbol peroid between 4000 and 5000ms, considered is start signal,or between 2000 and 2500ms,considered is repeat code
             if((((4000 < t_ir_data_struct.t_ir_rx_symbol[0].symbol_period)  &&

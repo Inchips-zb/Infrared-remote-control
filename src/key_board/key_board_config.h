@@ -13,9 +13,9 @@
 #define KEY_BOARD_MAX_NUM                             (1)
 
 //max key number
-#define KEY_COL_NUM                                   (4)
-#define KEY_ROW_NUM                                   (4)
-#define KEY_MAX_NUM                                   (KEY_COL_NUM*KEY_ROW_NUM)
+#define KEY_CTRL_NUM                                  (4)
+#define KEY_SIG_NUM                                   (4)
+#define KEY_MAX_NUM                                   (KEY_CTRL_NUM*KEY_SIG_NUM)
 //max combine ke number
 #define KEY_COMBINE_NUM                               (5)
 //default long press timer
