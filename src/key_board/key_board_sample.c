@@ -3,13 +3,11 @@
 #include "btstack_event.h"
 #include "../profile.h"
 
-typedef uint8_t keyFunc_t;
-
 typedef struct
 {
-    keyFunc_t ketHardId;
+    KeyId_t ketHardId;
     enum key_state_t state;
-    keyFunc_t keyId;
+    KeyId_t keyId;
     eClickState multiType;
     void (*cbFun)(void);
 } keyFuncMap_t;
@@ -20,7 +18,7 @@ typedef struct
     int combineKeyId;
     const struct key_combine_t *pCombineTab;
     uint8_t size;
-    keyFunc_t keyId;
+    KeyId_t keyId;
     void (*cbFun)(void);
 } keyCombineMap_t;
 
@@ -68,11 +66,11 @@ static void cmbinetest5(void)
 // Number of members limited to the macro definition KEY_COMBINE_NUM.
 static keyCombineMap_t keyCombineMap[] = 
 {
-    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_NULL,   cmbinetest1}, // combine1
-    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_NULL,   cmbinetest2}, // combine2
-    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_NULL,   cmbinetest3}, // combine3
-    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_NULL,   cmbinetest4}, // combine4
-    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,   cmbinetest5}, // combine5
+    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_IR_LEARN_START,   cmbinetest1}, // combine1
+    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_VR_ADV_START,   cmbinetest2}, // combine2
+    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_VR_ADV_STOP,   cmbinetest3}, // combine3
+    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_VR_POWER_ON,   cmbinetest4}, // combine4
+    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_VR_POWER_OFF,   cmbinetest5}, // combine5
 };
 #endif
 static void test14_press_continou(void)
@@ -106,9 +104,9 @@ static const keyFuncMap_t keyFuncMap[] = {
     {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J15
     {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     },  // J16
     
-    {KB_HARD_K14,   KEY_PRESS_CONTINUOUS,   KB_NULL        ,      MULTI_CLICK_NONE,  test14_press_continou   },  // J16
+    {KB_HARD_K14,   KEY_PRESS_CONTINUOUS,   0xea        ,      MULTI_CLICK_NONE,  test14_press_continou   },  // J16
     {KB_HARD_K15,   KEY_PRESS_LONG,         KB_NULL        ,      MULTI_CLICK_NONE,  test15_press_long   },  // J16
-    {KB_HARD_K16,   KEY_PRESS_MULTI,        KB_NULL        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
+    {KB_HARD_K16,   KEY_PRESS_MULTI,        0xed        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -209,9 +207,82 @@ const struct key_public_ctrl_t key_public_ctrl[] = {
     KEY_PUBLIC_CTRL_DEF(&key_pin_ctrl[3], pin_level_set),    
 };
 #endif
+
+#define KEY_CB_QUEUE_LENGTH 10
+
+typedef struct t_keyEventCb
+{
+    void (*cbFun)(void);
+} keyEventCb_t;
+
+// static queue struct 
+typedef struct t_queue{
+    keyEventCb_t * pBase;      //memory pool pointer
+    int front;                 //queue  front
+    int rare;                  //queue  rare
+} queue_t,*pQ;  
+
+static keyEventCb_t KeyCbMapList[KEY_CB_QUEUE_LENGTH];//Create a static queue memory pool
+
+static queue_t keyCbQueue = //Create a static queue object
+{
+    .pBase = KeyCbMapList,
+    .front = 0,
+    .rare = 0,
+};
+
+static void keyCbMapListInit(void)
+{
+    for(int i = 0;i<GET_ARRAY_SIZE(KeyCbMapList)-1;i++)
+    {
+        KeyCbMapList[i].cbFun = (void*) NULL;
+    }
+    
+}
+static bool Is_Full(void) //Queue full judge
+{
+    if ( (keyCbQueue.rare + 1) % GET_ARRAY_SIZE(KeyCbMapList) == keyCbQueue.front )
+        return true;
+    else
+        return false;
+}
+
+static bool Is_Empty(void) //Queue empty judge
+{
+    if (keyCbQueue.front == keyCbQueue.rare)
+        return true;
+    else
+        return false;
+}
+
+
+static int KeyCbFunQueuePush(void (*cbFun)(void))
+{
+    if (Is_Full()) //Queue over full dont push
+    {
+        platform_printf("F\n");
+        return -1;
+    }
+    keyCbQueue.pBase[keyCbQueue.rare].cbFun = cbFun;
+    keyCbQueue.rare = (keyCbQueue.rare + 1) % GET_ARRAY_SIZE(KeyCbMapList);
+    
+    return 1;
+}
+static int KeyCbFunQueuePop()
+{
+    if(Is_Empty())
+    {
+        return (-1);
+    }
+    keyCbQueue.pBase[ keyCbQueue.front].cbFun();
+    keyCbQueue.front = (keyCbQueue.front + 1) %  GET_ARRAY_SIZE(KeyCbMapList);
+    return 1;
+}
+
 static void kb_check_event_callback(void)
 {
     bool bFlag = false;
+    BaseType_t xReturn = pdPASS;
     for(int i = 0;i < GET_ARRAY_SIZE(keyFuncMap);i++)
     {
         if(KEY_PRESS_MULTI == keyFuncMap[i].state)
@@ -231,9 +302,21 @@ static void kb_check_event_callback(void)
        if(bFlag)
        {
             if(CB_FUN_NULL != keyFuncMap[i].cbFun)
-                keyFuncMap[i].cbFun();
+            {
+                KeyCbFunQueuePush(keyFuncMap[i].cbFun);
+            }   //keyFuncMap[i].cbFun();
             if(KB_NULL != keyFuncMap[i].keyId)
-                btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
+            {
+                if((NULL != xKeyQueue) /*&& uxQueueSpacesAvailable(xQueue)*/)
+                {
+                  xReturn = xQueueSendToBackFromISR( xKeyQueue, 
+                                        &keyFuncMap[i].keyId,
+                                        NULL );        
+                  if(pdPASS != xReturn)
+                      platform_printf("send error:%d\n\n",xReturn);
+                }
+            }
+       //btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
             bFlag = false;
        }
     
@@ -242,9 +325,22 @@ static void kb_check_event_callback(void)
     {
         if(keyCombineMap[i].combineKeyId && key_check_combine_state(keyCombineMap[i].combineKeyId))
         {
-            if(CB_FUN_NULL != keyCombineMap[i].cbFun)keyCombineMap[i].cbFun();
+            if(CB_FUN_NULL != keyCombineMap[i].cbFun)
+            {
+                KeyCbFunQueuePush(keyCombineMap[i].cbFun);
+            }//keyCombineMap[i].cbFun();
             if(KB_NULL != keyCombineMap[i].keyId) 
-                btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyCombineMap[i].keyId,sizeof(keyCombineMap[i].keyId));
+            {           
+                if((NULL != xKeyQueue) /*&& uxQueueSpacesAvailable(xQueue)*/)
+                {
+                  xReturn = xQueueSendToBackFromISR( xKeyQueue, 
+                                        &keyCombineMap[i].keyId,
+                                        NULL );        
+                  if(pdPASS != xReturn)
+                      platform_printf("send error:%d\n\n",xReturn);
+                }
+            }    
+             //   btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyCombineMap[i].keyId,sizeof(keyCombineMap[i].keyId));
         }
     
     }
@@ -259,20 +355,61 @@ static void combine_register(void)
         }
     }
 }
-#if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
 static TimerHandle_t complexKeyTimer = 0;
+#if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
 void (*cbFunSwTimer) (void);
+#endif
 static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
-    cbFunSwTimer();
+#if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)      
+    if(cbFunSwTimer)
+        cbFunSwTimer();
+#endif    
+    KeyCbFunQueuePop();
 }
-#endif
+
 #if USER_KEY_DEBUG
 void key_print_debug_callback(const char *str)
 {
     platform_printf("%s\n", str);
 }
 #endif
+
+#define QUEUE_LENGTH 10
+ 
+#define ITEM_SIZE sizeof( KeyId_t )
+ 
+static StaticQueue_t xStaticQueue;
+ 
+static KeyId_t ucKeyQueueStorageArea[ QUEUE_LENGTH * ITEM_SIZE ]; 
+ 
+QueueHandle_t xKeyQueue = NULL;
+static void KeyMsgQueueCreate(void)
+{
+    xKeyQueue = xQueueCreateStatic( QUEUE_LENGTH, 
+                                 ITEM_SIZE,
+                                 ucKeyQueueStorageArea,
+                                 &xStaticQueue );    
+    if(NULL == xKeyQueue)
+    {
+        platform_printf("error create\n");
+    }
+    xQueueReset(xKeyQueue);
+}
+
+KeyId_t key_id_get(void)
+{
+    BaseType_t xReturn = pdTRUE;
+    KeyId_t r_queue = KEY_NONE;	
+    xReturn = xQueueReceive( xKeyQueue,    
+                             &r_queue,      
+                             portMAX_DELAY); 
+    if(pdTRUE != xReturn)
+        r_queue = KEY_NONE;	
+    return r_queue;
+}
+
+
 /*key GPIO init*/
 
 void GPIO_Key_Board_Init(void)
@@ -313,13 +450,16 @@ void GPIO_Key_Board_Init(void)
 #if USER_KEY_DEBUG    
     key_board_debug_register(key_print_debug_callback);
 #endif    
-    #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)  
+    KeyMsgQueueCreate();
+    keyCbMapListInit();
+#if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)  
     cbFunSwTimer = kb_check_event_callback;   
+#endif
     complexKeyTimer = xTimerCreate("Complex Key",
                         pdMS_TO_TICKS(COMPLEX_TIMER_INTERVAL),
                         pdTRUE,
                         NULL,
                         ComplexKeyCallback);
     xTimerStart(complexKeyTimer, portMAX_DELAY);
-   #endif
+
 }

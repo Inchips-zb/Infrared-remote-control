@@ -156,6 +156,7 @@ static struct match_list_t combin_item[KEY_COMBINE_NUM];
 static key_app_t t_key_app;
 static inline void debug(const char *func, int line, const char *message)
 {
+#if USER_KEY_DEBUG
     #include <stdio.h>
 
     static char buff[128];
@@ -166,6 +167,7 @@ static inline void debug(const char *func, int line, const char *message)
     {
         internal_print_debug(buff);
     }
+ #endif
 }
 
 int key_board_init(void)

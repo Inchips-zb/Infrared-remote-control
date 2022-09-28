@@ -3,6 +3,9 @@
 
 #include "ingsoc.h"
 #include "key_board.h"
+#include "trace.h"
+
+typedef uint8_t KeyId_t;
 
 //Enable this macro if it is a matrix keyboard
 #define USER_KEY_BOARD_MATRIX 1
@@ -31,6 +34,11 @@
 #define KB_VOLUME_DOWN  0x81
 #define KB_VOICE_STOP   0x3F
 
+#define KB_IR_LEARN_START   0xFA
+#define KB_VR_ADV_START     0xFB
+#define KB_VR_ADV_STOP      0xFC
+#define KB_VR_POWER_ON      0xFD
+#define KB_VR_POWER_OFF     0xFE
 typedef enum
 {   
     GPIO_PIN_RESET = 0u,
@@ -71,7 +79,9 @@ struct key_pin_t {
     GPIO_PinState valid;
     GPIO_PinState invalid;
 };
+
+extern QueueHandle_t xKeyQueue;
 /*key bord init*/
 void GPIO_Key_Board_Init(void);
-
+KeyId_t key_id_get(void);
 #endif/*__KEY_BOARD_SAMPLE_H*/
