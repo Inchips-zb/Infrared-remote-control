@@ -66,11 +66,11 @@ static void cmbinetest5(void)
 // Number of members limited to the macro definition KEY_COMBINE_NUM.
 static keyCombineMap_t keyCombineMap[] = 
 {
-    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_IR_LEARN_START,   cmbinetest1}, // combine1
-    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_VR_ADV_START,   cmbinetest2}, // combine2
-    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_VR_ADV_STOP,   cmbinetest3}, // combine3
-    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_VR_POWER_ON,   cmbinetest4}, // combine4
-    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_VR_POWER_OFF,   cmbinetest5}, // combine5
+    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_IR_LEARN_START,     cmbinetest1}, // combine1
+    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_VR_ADV_START,       cmbinetest2}, // combine2
+    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_VR_ADV_STOP,        cmbinetest3}, // combine3
+    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_VR_POWER_ON,        cmbinetest4}, // combine4
+    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_VR_POWER_OFF,       cmbinetest5}, // combine5
 };
 #endif
 static void test14_press_continou(void)
@@ -86,7 +86,7 @@ static void test16_triple_click_press(void)
     platform_printf("k16 triple_click_press\n");
 }
 static const keyFuncMap_t keyFuncMap[] = {
-   //hard id       triger state   key_event id          key describe         
+   //hard id       triger state   key_event id             multi key type   event callback     
     {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J1
     {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J2
     {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J3

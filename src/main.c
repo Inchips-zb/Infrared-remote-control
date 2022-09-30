@@ -118,7 +118,7 @@ void setup_peripherals(void)
     }    
     config_uart(OSC_CLK_FREQ, 115200);
     t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_tx_mode,GIO_GPIO_32);
-    t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_rx_mode,GIO_GPIO_33);
+  // t_ir.init(IR_IR_MODE_IR_NEC,IR_txrx_mode_rx_mode,GIO_GPIO_33);
     GPIO_Key_Board_Init();
     init_timer1();
 }
@@ -149,6 +149,21 @@ static void watchdog_task(void *pdata)
      }
 }
 trace_rtt_t trace_ctx = {0};
+
+
+static void Receive_Task(void* parameter)
+{	
+  KeyId_t key; 
+  while (1)
+  {
+    key = key_id_get();
+    if(key)
+    {
+         t_ir.transmit_data(0xa55a,(uint16_t)key);
+    }
+    vTaskDelay(pdMS_TO_TICKS(10));
+  }
+} 
 int app_main()
 {
     static uint8_t sendflag = 0;
@@ -168,7 +183,12 @@ int app_main()
            NULL,
            (configMAX_PRIORITIES - 1),
            NULL);
-    
+    xTaskCreate(Receive_Task,
+           "t",
+           configMINIMAL_STACK_SIZE,
+           NULL,
+           (configMAX_PRIORITIES - 1),
+           NULL);   
     trace_rtt_init(&trace_ctx);
     platform_set_evt_callback(PLATFORM_CB_EVT_TRACE, (f_platform_evt_cb)cb_trace_rtt, &trace_ctx);
     // TODO: config trace mask

@@ -189,7 +189,12 @@ int key_board_init(void)
     return 0;
 }
 
-struct key_board_t *key_board_register(enum key_board_type_t type, const struct key_public_sig_t sig[], unsigned int key_sig_n, const struct key_public_ctrl_t ctrl[], unsigned int key_ctrl_n,void (*fun)(void))
+struct key_board_t *key_board_register(enum key_board_type_t type, 
+                                       const struct key_public_sig_t sig[], 
+                                       unsigned int key_sig_n, 
+                                       const struct key_public_ctrl_t ctrl[], 
+                                       unsigned int key_ctrl_n,
+                                       void (*fun)(void))
 {
     //struct key_board_t *obj;
     unsigned int handle_no_use;
