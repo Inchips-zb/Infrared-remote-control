@@ -12,7 +12,7 @@ typedef uint8_t KeyId_t;
 
 #define USER_KEY_DEBUG        0
 //hz 1ms
-#define KEY_SCAN_RATE           (1000)
+
 #define COMPLEX_TIMER_INTERVAL     20
 #define CB_FUN_NULL             (void*)NULL
 
@@ -33,6 +33,23 @@ typedef uint8_t KeyId_t;
 #define KB_VOLUME_UP    0x80
 #define KB_VOLUME_DOWN  0x81
 #define KB_VOICE_STOP   0x3F
+
+#define KB_IR_NULL         0xFF
+#define KB_IR_POWER        0x00
+#define KB_IR_PAGE_UP      0x0C
+#define KB_IR_PAGE_DOWN    0x0D
+#define KB_IR_MENU         0x08
+#define KB_IR_HOME         0x07
+#define KB_IR_ENTER        0x05        
+#define KB_IR_EXIT         0x06
+#define KB_IR_LEFT         0x03     
+#define KB_IR_RIGHT        0x04
+#define KB_IR_UP           0x01
+#define KB_IR_DOWN         0x02
+#define KB_IR_VOLUME_MUTE  0x0B
+#define KB_IR_VOLUME_UP    0x0A
+#define KB_IR_VOLUME_DOWN  0x09
+
 
 #define KB_IR_LEARN_START   0xFA
 #define KB_VR_ADV_START     0xFB
@@ -55,33 +72,20 @@ typedef enum
     SEVEN_CLICK         ,
     EIGHT,CLICK    
 } eClickState;
-enum key_id_hard_e {
-    KB_HARD_K1 = 0, 
-    KB_HARD_K2    , 
-    KB_HARD_K3    , 
-    KB_HARD_K4    , 
-    KB_HARD_K5    , 
-    KB_HARD_K6    , 
-    KB_HARD_K7    , 
-    KB_HARD_K8    , 
-    KB_HARD_K9    , 
-    KB_HARD_K10   , 
-    KB_HARD_K11   , 
-    KB_HARD_K12   ,
-    KB_HARD_K13   , 
-    KB_HARD_K14   ,
-    KB_HARD_K15   , 
-    KB_HARD_K16   , 
-    KB_HARD_END
-};
+
 struct key_pin_t {
     GIO_Index_t pin;
     GPIO_PinState valid;
     GPIO_PinState invalid;
 };
+typedef struct 
+{
+    KeyId_t keyId;
+    KeyId_t IrkeyId;  
+}key_t;
 
 extern QueueHandle_t xKeyQueue;
 /*key bord init*/
 void GPIO_Key_Board_Init(void);
-KeyId_t key_id_get(void);
+key_t key_id_get(void);
 #endif/*__KEY_BOARD_SAMPLE_H*/

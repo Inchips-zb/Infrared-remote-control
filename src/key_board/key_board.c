@@ -607,8 +607,6 @@ void key_check(void)
                     if((0 == pObj->sig[j].init_debounce_time) ||
                        (pObj->sig[j].debounce_time && (key_tick_ms - pObj->sig[j].debounce_time < KEY_MAX_TIME)))
                     {
-                        //pdescx = (struct key_pin_t *)(obj->sig[j].property->pin_desc);
-                       // pdescy = (struct key_pin_t *)(obj->ctrl[next].pin_desc);
                         pObj->sig[j].state = KEY_PRESS;
 						t_key_app.bEventHappen = true;
                        // platform_printf("x:%d,y:%d\r\n",pdescx->pin,pdescy->pin);
@@ -623,7 +621,6 @@ void key_check(void)
                 case 0x11:
                     //Clear 0 to solve the BUG caused by multiple debounce time
                     pObj->sig[j].debounce_time = 0;
-
                     pObj->sig[j].state = KEY_PRESSING;
                     ++pObj->sig[j].pressing_event.wr_cnt;
 					t_key_app.bEventHappen = true;

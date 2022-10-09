@@ -66,6 +66,26 @@ typedef bool (*pin_level_get_callback)(const void *);
 typedef void (*pin_level_set_callback)(const void *, bool);
 typedef void (*print_debug_callback)(const char *);
 
+typedef enum  {
+    KB_HARD_K1 = 0, 
+    KB_HARD_K2    , 
+    KB_HARD_K3    , 
+    KB_HARD_K4    , 
+    KB_HARD_K5    , 
+    KB_HARD_K6    , 
+    KB_HARD_K7    , 
+    KB_HARD_K8    , 
+    KB_HARD_K9    , 
+    KB_HARD_K10   , 
+    KB_HARD_K11   , 
+    KB_HARD_K12   ,
+    KB_HARD_K13   , 
+    KB_HARD_K14   ,
+    KB_HARD_K15   , 
+    KB_HARD_K16   , 
+    KB_HARD_END
+}key_id_hard_e;
+
 enum key_board_type_t {
     KEY_BOARD_NORMAL,       //Common single IO control button
     KEY_BOARD_MATRIX        //Matrix keyboard for row and column scanning
@@ -84,7 +104,7 @@ struct key_public_ctrl_t {
 };
 
 struct key_combine_t {
-    unsigned int id;            //Key ID
+    key_id_hard_e id;            //hard Key ID
     enum key_state_t state;     //Key state
 };
 

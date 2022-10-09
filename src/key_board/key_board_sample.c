@@ -3,12 +3,13 @@
 #include "btstack_event.h"
 #include "../profile.h"
 
+
 typedef struct
 {
-    KeyId_t ketHardId;
+    key_id_hard_e keyHardId;
     enum key_state_t state;
-    KeyId_t keyId;
-    eClickState multiType;
+    key_t key;
+    eClickState multiType;  //if KEY_PRESS_CONTINUOUS state
     void (*cbFun)(void);
 } keyFuncMap_t;
 
@@ -18,7 +19,7 @@ typedef struct
     int combineKeyId;
     const struct key_combine_t *pCombineTab;
     uint8_t size;
-    KeyId_t keyId;
+    key_t key;
     void (*cbFun)(void);
 } keyCombineMap_t;
 
@@ -66,11 +67,11 @@ static void cmbinetest5(void)
 // Number of members limited to the macro definition KEY_COMBINE_NUM.
 static keyCombineMap_t keyCombineMap[] = 
 {
-    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_IR_LEARN_START,     cmbinetest1}, // combine1
-    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_VR_ADV_START,       cmbinetest2}, // combine2
-    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_VR_ADV_STOP,        cmbinetest3}, // combine3
-    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_VR_POWER_ON,        cmbinetest4}, // combine4
-    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_VR_POWER_OFF,       cmbinetest5}, // combine5
+    {0,  key_ir_learn,  GET_ARRAY_SIZE(key_ir_learn),    KB_NULL,     KB_IR_NULL ,       cmbinetest1}, // combine1
+    {0,  key_adv_start, GET_ARRAY_SIZE(key_adv_start),   KB_NULL,     KB_IR_NULL ,       cmbinetest2}, // combine2
+    {0,  key_adv_stop,  GET_ARRAY_SIZE(key_adv_stop),    KB_NULL,     KB_IR_NULL ,       cmbinetest3}, // combine3
+    {0,  key_power_on,  GET_ARRAY_SIZE(key_power_on),    KB_NULL,     KB_IR_NULL ,       cmbinetest4}, // combine4
+    {0,  key_power_off, GET_ARRAY_SIZE(key_power_off),   KB_NULL,     KB_IR_NULL ,       cmbinetest5}, // combine5
 };
 #endif
 static void test14_press_continou(void)
@@ -86,27 +87,27 @@ static void test16_triple_click_press(void)
     platform_printf("k16 triple_click_press\n");
 }
 static const keyFuncMap_t keyFuncMap[] = {
-   //hard id       triger state   key_event id             multi key type   event callback     
-    {KB_HARD_K1,    KEY_PRESS,      KB_LEFT        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J1
-    {KB_HARD_K2,    KEY_PRESS,      KB_RIGHT       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J2
-    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J3
-    {KB_HARD_K4,    KEY_PRESS,      KB_DOWN        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J4
-    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J5
-    {KB_HARD_K6,    KEY_PRESS,      KB_EXIT        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J6
-    {KB_HARD_K7,    KEY_PRESS,      KB_POWER       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J7
-    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J8
-    {KB_HARD_K9,    KEY_PRESS,      KB_HOME        ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J9
-    {KB_HARD_K10,   KEY_PRESS,      KB_VOICE       ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J10
-    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_MUTE ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J11
-    {KB_HARD_K12,   KEY_PRESS,      KB_VOLUME_UP   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J12
-    {KB_HARD_K13,   KEY_PRESS,      KB_VOLUME_DOWN ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J13
-    {KB_HARD_K14,   KEY_PRESS,      KB_VOICE_STOP  ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J14
-    {KB_HARD_K15,   KEY_PRESS,      KB_PAGE_UP     ,      MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J15
-    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,      MULTI_CLICK_NONE,  CB_FUN_NULL     },  // J16
+   //hard id       trigger state   key_event id      ir key id            multi key type   event callback     
+    {KB_HARD_K1,    KEY_PRESS,      KB_VOLUME_MUTE ,KB_IR_VOLUME_MUTE , MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J1
+    {KB_HARD_K2,    KEY_PRESS,      KB_POWER       ,KB_IR_POWER ,       MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J2
+    {KB_HARD_K3,    KEY_PRESS,      KB_UP          ,KB_IR_UP ,          MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J3
+    {KB_HARD_K4,    KEY_PRESS,      KB_RIGHT       ,KB_IR_RIGHT ,       MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J4
+    {KB_HARD_K5,    KEY_PRESS,      KB_ENTER       ,KB_IR_ENTER ,       MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J5
+    {KB_HARD_K6,    KEY_PRESS,      KB_LEFT        ,KB_IR_LEFT ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J6
+    {KB_HARD_K7,    KEY_PRESS,      KB_DOWN        ,KB_IR_DOWN ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J7
+    {KB_HARD_K8,    KEY_PRESS,      KB_MENU        ,KB_IR_MENU ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J8
+    {KB_HARD_K9,    KEY_PRESS,      KB_VOICE       ,KB_IR_NULL ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J9
+    {KB_HARD_K10,   KEY_PRESS,      KB_EXIT        ,KB_IR_EXIT ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J10
+    {KB_HARD_K11,   KEY_PRESS,      KB_VOLUME_UP   ,KB_IR_VOLUME_UP ,   MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J11
+    {KB_HARD_K12,   KEY_PRESS,      KB_HOME        ,KB_IR_HOME ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J12
+    {KB_HARD_K13,   KEY_PRESS,      KB_PAGE_UP     ,KB_IR_PAGE_UP ,     MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J13
+    {KB_HARD_K14,   KEY_PRESS,      KB_VOLUME_DOWN ,KB_IR_VOLUME_DOWN , MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J14
+    {KB_HARD_K15,   KEY_PRESS,      KB_NULL        ,KB_IR_NULL ,        MULTI_CLICK_NONE,  CB_FUN_NULL     }, // J15
+    {KB_HARD_K16,   KEY_PRESS,      KB_PAGE_DOWN   ,KB_IR_PAGE_DOWN ,   MULTI_CLICK_NONE,  CB_FUN_NULL     },  // J16
     
-    {KB_HARD_K14,   KEY_PRESS_CONTINUOUS,   0xea        ,      MULTI_CLICK_NONE,  test14_press_continou   },  // J16
-    {KB_HARD_K15,   KEY_PRESS_LONG,         KB_NULL        ,      MULTI_CLICK_NONE,  test15_press_long   },  // J16
-    {KB_HARD_K16,   KEY_PRESS_MULTI,        0xed        ,      TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
+//    {KB_HARD_K14,   KEY_PRESS_CONTINUOUS,   KB_NULL     , KB_IR_NULL ,     MULTI_CLICK_NONE,  test14_press_continou   },  // J16
+//    {KB_HARD_K15,   KEY_PRESS_LONG,         KB_NULL     , KB_IR_NULL ,     MULTI_CLICK_NONE,  test15_press_long   },  // J16
+//    {KB_HARD_K16,   KEY_PRESS_MULTI,        KB_NULL     , KB_IR_NULL ,     TRIPLE_CLICK    ,  test16_triple_click_press   },  // J16   
 };
 
 const struct key_pin_t key_pin_sig[] = {
@@ -177,11 +178,12 @@ static inline void pin_level_set(const void *desc, bool flag)
 #endif
 
 const struct key_public_sig_t key_public_sig[] = {
+#if (USER_KEY_BOARD_MATRIX)    
     KEY_PUBLIC_SIG_DEF(KB_HARD_K1, &key_pin_sig[0], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K5, &key_pin_sig[1], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K9, &key_pin_sig[2], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K13, &key_pin_sig[3], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
-#if (USER_KEY_BOARD_MATRIX)
+
     KEY_PUBLIC_SIG_DEF(KB_HARD_K2, &key_pin_sig[0], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K6, &key_pin_sig[1], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K10, &key_pin_sig[2], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
@@ -195,7 +197,13 @@ const struct key_public_sig_t key_public_sig[] = {
     KEY_PUBLIC_SIG_DEF(KB_HARD_K4, &key_pin_sig[0], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K8, &key_pin_sig[1], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
     KEY_PUBLIC_SIG_DEF(KB_HARD_K12, &key_pin_sig[2], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
-    KEY_PUBLIC_SIG_DEF(KB_HARD_K16, &key_pin_sig[3], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),    
+    KEY_PUBLIC_SIG_DEF(KB_HARD_K16, &key_pin_sig[3], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
+#else
+    KEY_PUBLIC_SIG_DEF(KB_HARD_K1, &key_pin_sig[0], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
+    KEY_PUBLIC_SIG_DEF(KB_HARD_K2, &key_pin_sig[1], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
+    KEY_PUBLIC_SIG_DEF(KB_HARD_K3, &key_pin_sig[2], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
+    KEY_PUBLIC_SIG_DEF(KB_HARD_K4, &key_pin_sig[3], pin_level_get, KEY_FLAG_PRESS_CONTINUOUS | KEY_FLAG_PRESS_LONG | KEY_FLAG_RELEASE_LONG | KEY_FLAG_PRESS_MULTI | KEY_FLAG_RELEASE_MULTI),
+
 #endif
 };
 
@@ -278,25 +286,31 @@ static int KeyCbFunQueuePop()
     keyCbQueue.front = (keyCbQueue.front + 1) %  GET_ARRAY_SIZE(KeyCbMapList);
     return 1;
 }
-
+static bool repeat_flag = 0;
 static void kb_check_event_callback(void)
 {
     bool bFlag = false;
+    static uint8_t com_count = 0;
     BaseType_t xReturn = pdPASS;
     for(int i = 0;i < GET_ARRAY_SIZE(keyFuncMap);i++)
     {
         if(KEY_PRESS_MULTI == keyFuncMap[i].state)
         {
-            if(keyFuncMap[i].multiType == key_check_state(keyFuncMap[i].ketHardId, keyFuncMap[i].state))
+            if(keyFuncMap[i].multiType == key_check_state(keyFuncMap[i].keyHardId, keyFuncMap[i].state))
             {
                 bFlag = true;
             }
         }
         else
         {
-            if(key_check_state(keyFuncMap[i].ketHardId, keyFuncMap[i].state))
+            if(key_check_state(keyFuncMap[i].keyHardId,KEY_RELEASE))
             {
-                bFlag = true;                
+                com_count--;
+            }
+            if(key_check_state(keyFuncMap[i].keyHardId, keyFuncMap[i].state))
+            {
+                bFlag = true;  
+                if(KEY_PRESS == keyFuncMap[i].state) com_count++;
             }
         }
        if(bFlag)
@@ -304,23 +318,25 @@ static void kb_check_event_callback(void)
             if(CB_FUN_NULL != keyFuncMap[i].cbFun)
             {
                 KeyCbFunQueuePush(keyFuncMap[i].cbFun);
-            }   //keyFuncMap[i].cbFun();
-            if(KB_NULL != keyFuncMap[i].keyId)
+            }   
+            if(KB_NULL != keyFuncMap[i].key.keyId)
             {
-                if((NULL != xKeyQueue) /*&& uxQueueSpacesAvailable(xQueue)*/)
+                if((NULL != xKeyQueue))
                 {
                   xReturn = xQueueSendToBackFromISR( xKeyQueue, 
-                                        &keyFuncMap[i].keyId,
+                                        &keyFuncMap[i].key,
                                         NULL );        
                   if(pdPASS != xReturn)
-                      platform_printf("send error:%d\n\n",xReturn);
+                      platform_printf("send error\n");
                 }
             }
-       //btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyFuncMap[i].keyId,sizeof(keyFuncMap[i].keyId));
             bFlag = false;
        }
     
     }
+    
+    repeat_flag = (1 == com_count) ?  true : false; 
+
     for(int i = 0;i < GET_ARRAY_SIZE(keyCombineMap);i++)
     {
         if(keyCombineMap[i].combineKeyId && key_check_combine_state(keyCombineMap[i].combineKeyId))
@@ -328,19 +344,18 @@ static void kb_check_event_callback(void)
             if(CB_FUN_NULL != keyCombineMap[i].cbFun)
             {
                 KeyCbFunQueuePush(keyCombineMap[i].cbFun);
-            }//keyCombineMap[i].cbFun();
-            if(KB_NULL != keyCombineMap[i].keyId) 
+            }
+            if(KB_NULL != keyCombineMap[i].key.keyId) 
             {           
-                if((NULL != xKeyQueue) /*&& uxQueueSpacesAvailable(xQueue)*/)
+                if((NULL != xKeyQueue))
                 {
                   xReturn = xQueueSendToBackFromISR( xKeyQueue, 
-                                        &keyCombineMap[i].keyId,
+                                        &keyCombineMap[i].key,
                                         NULL );        
                   if(pdPASS != xReturn)
-                      platform_printf("send error:%d\n\n",xReturn);
+                      platform_printf("send error\n");
                 }
             }    
-             //   btstack_push_user_msg(USER_MSG_ID_HARD_KEY, &keyCombineMap[i].keyId,sizeof(keyCombineMap[i].keyId));
         }
     
     }
@@ -359,13 +374,26 @@ static TimerHandle_t complexKeyTimer = 0;
 #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)   
 void (*cbFunSwTimer) (void);
 #endif
+#include "../user_ir_remote.h"
 static void ComplexKeyCallback(TimerHandle_t xTimer)
 {
+    static uint16_t repeat_tick = 0;
 #if(KEY_TRIG_QUERY == KEY_EVENT_TRIG_MODE)      
     if(cbFunSwTimer)
         cbFunSwTimer();
 #endif    
     KeyCbFunQueuePop();
+    if(repeat_flag)
+    {
+        if(!(++repeat_tick % 7))
+        {
+            t_ir.transmit_repeat();
+        }
+    
+    }
+    else{
+        repeat_tick = 0;
+    }
 }
 
 #if USER_KEY_DEBUG
@@ -377,11 +405,11 @@ void key_print_debug_callback(const char *str)
 
 #define QUEUE_LENGTH 10
  
-#define ITEM_SIZE sizeof( KeyId_t )
+#define ITEM_SIZE sizeof( key_t )
  
 static StaticQueue_t xStaticQueue;
  
-static KeyId_t ucKeyQueueStorageArea[ QUEUE_LENGTH * ITEM_SIZE ]; 
+static uint8_t ucKeyQueueStorageArea[ QUEUE_LENGTH * ITEM_SIZE ]; 
  
 QueueHandle_t xKeyQueue = NULL;
 static void KeyMsgQueueCreate(void)
@@ -397,20 +425,57 @@ static void KeyMsgQueueCreate(void)
     xQueueReset(xKeyQueue);
 }
 
-KeyId_t key_id_get(void)
+key_t key_id_get(void)
 {
     BaseType_t xReturn = pdTRUE;
-    KeyId_t r_queue = KEY_NONE;	
-    xReturn = xQueueReceive( xKeyQueue,    
-                             &r_queue,      
-                             portMAX_DELAY); 
+    key_t r_key;
+    xReturn = xQueueReceive( xKeyQueue,&r_key, portMAX_DELAY); 
     if(pdTRUE != xReturn)
-        r_queue = KEY_NONE;	
-    return r_queue;
+    {
+        r_key.keyId = KB_NULL;
+        r_key.IrkeyId = KB_IR_NULL;
+    }        
+    return r_key;
 }
 
 
-/*key GPIO init*/
+/*key timer init*/
+static uint32_t timer1_isr(void *user_data);
+static void init_timer1(void)
+{
+    SYSCTRL_ClearClkGateMulti(0
+                                | (1 << SYSCTRL_ClkGate_APB_TMR1));
+#if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
+    // setup timer 1: 40us (25kHz)
+    TMR_SetCMP(APB_TMR1, TMR_CLK_FREQ / 25000);
+    TMR_SetOpMode(APB_TMR1, TMR_CTL_OP_MODE_WRAPPING);
+    TMR_IntEnable(APB_TMR1);
+    TMR_Reload(APB_TMR1);
+    TMR_Enable(APB_TMR1);
+#elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
+    SYSCTRL_SelectTimerClk(TMR_PORT_1, SYSCTRL_TMR_CLK_OSC_DIV_4); 
+    TMR_SetOpMode(APB_TMR1, 0, TMR_CTL_OP_MODE_32BIT_TIMER_x1, TMR_CLK_MODE_EXTERNAL, 0);
+    TMR_SetReload(APB_TMR1, 0, TMR_GetClk(APB_TMR1,0) / KEY_SCAN_RATE);
+    TMR_IntEnable(APB_TMR1, 0, 0x1);
+    TMR_Enable(APB_TMR1, 0, 0x1);
+#else
+    #error unknown or unsupported chip family
+#endif
+	platform_set_irq_callback(PLATFORM_CB_IRQ_TIMER1, timer1_isr, NULL);
+}
+
+static uint32_t timer1_isr(void *user_data)
+{
+    key_check();
+#if (INGCHIPS_FAMILY == INGCHIPS_FAMILY_918)
+    TMR_IntClr(APB_TMR1);
+#elif (INGCHIPS_FAMILY == INGCHIPS_FAMILY_916)
+    TMR_IntClr(APB_TMR1, 0, 0x1);
+#else
+    #error unknown or unsupported chip family
+#endif
+    return 0;
+}
 
 void GPIO_Key_Board_Init(void)
 {
@@ -434,7 +499,7 @@ void GPIO_Key_Board_Init(void)
     }
 #endif
     key_board_init();
-
+    init_timer1();
 #if (USER_KEY_BOARD_MATRIX)
     #if (KEY_EVENT_TRIG_MODE == KEY_TRIG_REPORT)
     key_board_register(KEY_BOARD_MATRIX, key_public_sig, GET_ARRAY_SIZE(key_public_sig), key_public_ctrl, GET_ARRAY_SIZE(key_public_ctrl),kb_check_event_callback);
